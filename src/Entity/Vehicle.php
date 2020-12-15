@@ -1,0 +1,275 @@
+<?php
+
+namespace App\Entity;
+
+use App\Repository\VehicleRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * @ORM\Entity(repositoryClass=VehicleRepository::class)
+ */
+class Vehicle
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type="integer")
+     */
+    private $id;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $mark;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $model;
+
+    /**
+     * @ORM\Column(type="date")
+     */
+    private $modelYear;
+
+    /**
+     * @ORM\Column(type="date")
+     */
+    private $manufactureYear;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $gears;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $color;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $gearbox;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $status;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $power;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $type;
+
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $price;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Image::class, mappedBy="vehicle", orphanRemoval=true)
+     */
+    private $images;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Cover::class, mappedBy="vehicle", cascade={"persist", "remove"})
+     */
+    private $cover;
+
+    public function __construct()
+    {
+        $this->images = new ArrayCollection();
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getMark(): ?string
+    {
+        return $this->mark;
+    }
+
+    public function setMark(string $mark): self
+    {
+        $this->mark = $mark;
+
+        return $this;
+    }
+
+    public function getModel(): ?string
+    {
+        return $this->model;
+    }
+
+    public function setModel(string $model): self
+    {
+        $this->model = $model;
+
+        return $this;
+    }
+
+    public function getModelYear(): ?\DateTimeInterface
+    {
+        return $this->modelYear;
+    }
+
+    public function setModelYear(\DateTimeInterface $modelYear): self
+    {
+        $this->modelYear = $modelYear;
+
+        return $this;
+    }
+
+    public function getManufactureYear(): ?\DateTimeInterface
+    {
+        return $this->manufactureYear;
+    }
+
+    public function setManufactureYear(\DateTimeInterface $manufactureYear): self
+    {
+        $this->manufactureYear = $manufactureYear;
+
+        return $this;
+    }
+
+    public function getGears(): ?int
+    {
+        return $this->gears;
+    }
+
+    public function setGears(int $gears): self
+    {
+        $this->gears = $gears;
+
+        return $this;
+    }
+
+    public function getColor(): ?string
+    {
+        return $this->color;
+    }
+
+    public function setColor(string $color): self
+    {
+        $this->color = $color;
+
+        return $this;
+    }
+
+    public function getGearbox(): ?string
+    {
+        return $this->gearbox;
+    }
+
+    public function setGearbox(string $gearbox): self
+    {
+        $this->gearbox = $gearbox;
+
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    public function getPower(): ?int
+    {
+        return $this->power;
+    }
+
+    public function setPower(int $power): self
+    {
+        $this->power = $power;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getPrice(): ?float
+    {
+        return $this->price;
+    }
+
+    public function setPrice(float $price): self
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Image[]
+     */
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+    public function addImage(Image $image): self
+    {
+        if (!$this->images->contains($image)) {
+            $this->images[] = $image;
+            $image->setVehicle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeImage(Image $image): self
+    {
+        if ($this->images->removeElement($image)) {
+            // set the owning side to null (unless already changed)
+            if ($image->getVehicle() === $this) {
+                $image->setVehicle(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCover(): ?Cover
+    {
+        return $this->cover;
+    }
+
+    public function setCover(Cover $cover): self
+    {
+        $this->cover = $cover;
+
+        // set the owning side of the relation if necessary
+        if ($cover->getVehicle() !== $this) {
+            $cover->setVehicle($this);
+        }
+
+        return $this;
+    }
+}
