@@ -99,6 +99,7 @@ class VehicleController extends AbstractController
         } else {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->remove($vehicle);
+            $entityManager->flush();
             return new JsonResponse('success', 200);
         }
     }
