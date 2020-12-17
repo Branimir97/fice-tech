@@ -18,9 +18,9 @@ class Image
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="text")
      */
-    private $path;
+    private $base64;
 
     /**
      * @ORM\ManyToOne(targetEntity=Vehicle::class, inversedBy="images")
@@ -28,19 +28,24 @@ class Image
      */
     private $vehicle;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isCover;
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getPath(): ?string
+    public function getBase64(): ?string
     {
-        return $this->path;
+        return $this->base64;
     }
 
-    public function setPath(string $path): self
+    public function setBase64(string $base64): self
     {
-        $this->path = $path;
+        $this->base64 = $base64;
 
         return $this;
     }
@@ -53,6 +58,18 @@ class Image
     public function setVehicle(?Vehicle $vehicle): self
     {
         $this->vehicle = $vehicle;
+
+        return $this;
+    }
+
+    public function getIsCover(): ?bool
+    {
+        return $this->isCover;
+    }
+
+    public function setIsCover(bool $isCover): self
+    {
+        $this->isCover = $isCover;
 
         return $this;
     }

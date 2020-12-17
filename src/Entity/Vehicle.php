@@ -272,18 +272,4 @@ class Vehicle
 
         return $this;
     }
-
-    public function constructObject($mark, $model, $modelYear, $manufactureYear, $gears, $color, $gearbox, $power, $type, $status, $price) {
-        $this->mark = $mark;
-        $this->model = $model;
-        $this->modelYear = $modelYear;
-        $this->manufactureYear = $manufactureYear;
-        $this->gears =  $gears;
-        $this->color = $color;
-        $this->gearbox = $gearbox;
-        $this->power = $power;
-        $this->type = $type;
-        $this->status = $status;
-        $this->price = $price;
-    }
 }

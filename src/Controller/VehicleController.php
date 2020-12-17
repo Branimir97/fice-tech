@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Image;
 use App\Entity\Vehicle;
 use App\Exceptions\CreateVehicleException;
 use App\Repository\VehicleRepository;
@@ -11,6 +12,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Json;
 
 class VehicleController extends AbstractController
 {
@@ -26,32 +28,42 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/new")
+     * @Route("/new", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
     public function createAction(Request $request): JsonResponse
     {
-        $mark = $request->query->get('mark');
-        $model = $request->query->get('model');
-        $modelYear = new \DateTime($request->query->get('modelYear'));
-        $manufactureYear = new \DateTime($request->query->get('manufactureYear'));
-        $gears = $request->query->get('gears');
-        $color = $request->query->get('color');
-        $gearbox = $request->query->get('gearbox');
-        $power = $request->query->get('power');
-        $type = $request->query->get('type');
-        $status = $request->query->get('status');
-        $price = $request->query->get('price');
 
-        $vehicle = new Vehicle();
-        $vehicle->constructObject($mark, $model ,$modelYear, $manufactureYear, $gears, $color, $gearbox, $power, $type, $status, $price);
-        $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($vehicle);
-        $entityManager->flush();
+            $response = json_decode($request->getContent(), true);
 
-        return new JsonResponse('success', 201);
+            $vehicle = new Vehicle();
+            $vehicle->setMark($response['mark']);
+            $vehicle->setModel($response['model']);
+            $vehicle->setModelYear(new \DateTime($response['modelYear']));
+            $vehicle->setManufactureYear(new \DateTime($response['manufactureYear']));
+            $vehicle->setGears($response['gears']);
+            $vehicle->setColor($response['color']);
+            $vehicle->setGearbox($response['gearbox']);
+            $vehicle->setStatus($response['status']);
+            $vehicle->setPower($response['power']);
+            $vehicle->setType($response['type']);
+            $vehicle->setPrice($response['price']);
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->persist($vehicle);
+            $entityManager->flush();
+
+            foreach($response['images'] as $imageResponse) {
+                $image = new Image();
+                $image->setIsCover($imageResponse['isCover']);
+                $image->setBase64($imageResponse['base64']);
+                $image->setVehicle($vehicle);
+                $entityManager->persist($image);
+                $entityManager->flush();
+            }
+            return new JsonResponse('success', 200);
+
     }
 
     /**
