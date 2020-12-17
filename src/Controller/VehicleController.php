@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints\Json;
 class VehicleController extends AbstractController
 {
     /**
-     * @Route("/", name="home", methods={"GET"})
+     * @Route("/", name="vehicle_list", methods={"GET"})
      * @param VehicleRepository $vehicleRepository
      * @return Response
      */
@@ -32,7 +32,7 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/create", methods={"POST"})
+     * @Route("/insert", name="vehicle_insert", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
@@ -69,7 +69,7 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/update/{id}", methods={"PUT"})
+     * @Route("/update/{id}", name="vehicle_update", methods={"PUT"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
@@ -100,7 +100,7 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/delete/{id}", methods={"DELETE"})
+     * @Route("/delete/{id}", name="vehicle_delete", methods={"DELETE"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
