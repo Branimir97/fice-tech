@@ -4,7 +4,10 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Form\RegistrationFormType;
+use App\Repository\UserRepository;
+use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -13,33 +16,33 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 class RegistrationController extends AbstractController
 {
     /**
-     * @Route("/register", name="app_register")
+     * @Route("/register", name="app_register", methods={"POST"})
+     * @param Request $request
+     * @param UserPasswordEncoderInterface $passwordEncoder
+     * @param UserRepository $userRepository
+     * @return Response
+     * @throws Exception
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder): Response
+    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, UserRepository $userRepository): Response
     {
-        $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user);
-        $form->handleRequest($request);
+        $response = json_decode($request->getContent(), true);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            // encode the plain password
-            $user->setPassword(
-                $passwordEncoder->encodePassword(
-                    $user,
-                    $form->get('plainPassword')->getData()
-                )
-            );
-
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->persist($user);
-            $entityManager->flush();
-            // do anything else you need here, like send an email
-
-            return $this->redirectToRoute('app_login');
+        foreach($userRepository->findAll() as $user) {
+            if($user->getEmail() == $response['email']) {
+                return new JsonResponse('user already exists)', 400);
+            }
         }
+        $user = new User();
+        $user->setFirstName($response['firstName']);
+        $user->setLastName($response['lastName']);
+        $user->setBirthday(new \DateTime($response['birthday']));
+        $user->setEmail($response['email']);
+        $user->setPassword($passwordEncoder->encodePassword($user, $response['password']));
+        $user->setRoles(['ROLE_USER']);
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
 
-        return $this->render('registration/register.html.twig', [
-            'registrationForm' => $form->createView(),
-        ]);
+        return new JsonResponse('success', 200);
     }
 }
