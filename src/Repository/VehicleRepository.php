@@ -21,7 +21,8 @@ class VehicleRepository extends ServiceEntityRepository
 
     public function findAllAsArray() {
         $query = $this->createQueryBuilder('v')
-            ->select('v');
+            ->join('v.images', 'i')
+            ->addSelect('i');
 
         return $query->getQuery()->getArrayResult();
     }
