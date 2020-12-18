@@ -63,7 +63,7 @@ class ReservationController extends AbstractController
     }
 
     /**
-     * @Route("/insert", name="reservation_insert", methods={"POST"})
+     * @Route("/insert/{id}", name="reservation_insert", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
@@ -71,8 +71,9 @@ class ReservationController extends AbstractController
      */
     public function insertAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
+        $id = $request->get('id');
         $response = json_decode($request->getContent(), true);
-        $vehicle = $vehicleRepository->findOneBy(["id"=>$response['vehicle']]);
+        $vehicle = $vehicleRepository->findOneBy(["id"=>$id]);
         $reservation = new Reservation();
         $reservation->setUser($this->getUser());
         $reservation->setVehicle($vehicle);
