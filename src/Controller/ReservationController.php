@@ -74,7 +74,7 @@ class ReservationController extends AbstractController
         $response = json_decode($request->getContent(), true);
         $vehicle = $vehicleRepository->findOneBy(["id"=>$response['vehicle']]);
         $reservation = new Reservation();
-        $reservation->setUser();
+        $reservation->setUser($this->getUser());
         $reservation->setVehicle($vehicle);
         $reservation->setStartTime(new \DateTime($response['startTime']));
         $reservation->setEndTime((new \DateTime($response['endTime'])));
@@ -110,11 +110,10 @@ class ReservationController extends AbstractController
     /**
      * @param Request $request
      * @param ReservationRepository $reservationRepository
-     * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
      * @Route("/approve/{id}", name="reservation_approve", methods={"POST"})
      */
-    public function changeReservationApprovalAction(Request $request, ReservationRepository $reservationRepository, VehicleRepository $vehicleRepository): JsonResponse
+    public function changeReservationApprovalAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(["id"=>$id]);
