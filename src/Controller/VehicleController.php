@@ -16,7 +16,7 @@ use Symfony\Component\Validator\Constraints\Json;
 /**
  * Class VehicleController
  * @package App\Controller
- * @Route("/vehicle")
+ * @Route("/vehicles")
  */
 class VehicleController extends AbstractController
 {

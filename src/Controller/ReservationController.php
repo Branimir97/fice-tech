@@ -16,7 +16,7 @@ use Symfony\Component\Routing\Annotation\Route;
 /**
  * Class ReservationController
  * @package App\Controller
- * @Route("/reservation")
+ * @Route("/reservations")
  */
 class ReservationController extends AbstractController
 {
@@ -110,16 +110,24 @@ class ReservationController extends AbstractController
     /**
      * @param Request $request
      * @param ReservationRepository $reservationRepository
-     * @Route("/approve/{id}", name="reservation_approve", methods={"POST"})
+     * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
+     * @Route("/approve/{id}", name="reservation_approve", methods={"POST"})
      */
     public function changeReservationApprovalAction(Request $request, ReservationRepository $reservationRepository, VehicleRepository $vehicleRepository): JsonResponse
     {
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(["id"=>$id]);
+        if($reservation->isApproved()) {
+            return new JsonResponse('reservation is already approved', 400);
+        }
         $vehicle = $reservation->getVehicle();
-        $vehicle->setStatus('reserved');
+        $vehicle->setStatus('Reserved');
         $reservation->setIsApproved(true);
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($vehicle);
+        $entityManager->persist($reservation);
+        $entityManager->flush();
         return new JsonResponse('success', 200);
     }
 }
