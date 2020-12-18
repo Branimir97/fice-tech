@@ -40,9 +40,9 @@ class Reservation
     private $vehicle;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="boolean")
      */
-    private $status = 'not approved';
+    private $isApproved = false;
 
     public function getId(): ?int
     {
@@ -97,13 +97,13 @@ class Reservation
         return $this;
     }
 
-    public function getStatus(): string
+    public function isApproved(): bool
     {
-        return $this->status;
+        return $this->isApproved;
     }
 
-    public function setStatus(string $status): void
+    public function setIsApproved(bool $isApproved): void
     {
-        $this->status = $status;
+        $this->isApproved = $isApproved;
     }
 }

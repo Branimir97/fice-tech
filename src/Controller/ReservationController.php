@@ -95,16 +95,31 @@ class ReservationController extends AbstractController
     {
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(['id'=>$id]);
+        $vehicle = $reservation->getVehicle();
         if($reservation === null) {
             return new JsonResponse('reservation does not exist', 400);
         }
         $entityManager = $this->getDoctrine()->getManager();
+        $vehicle->setStatus('available');
+        $entityManager->persist($vehicle);
         $entityManager->remove($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
     }
 
-    public function changeReservationApprovalAction(Request $request) {
-
+    /**
+     * @param Request $request
+     * @param ReservationRepository $reservationRepository
+     * @Route("/approve/{id}", name="reservation_approve", methods={"POST"})
+     * @return JsonResponse
+     */
+    public function changeReservationApprovalAction(Request $request, ReservationRepository $reservationRepository, VehicleRepository $vehicleRepository): JsonResponse
+    {
+        $id = $request->get('id');
+        $reservation = $reservationRepository->findOneBy(["id"=>$id]);
+        $vehicle = $reservation->getVehicle();
+        $vehicle->setStatus('reserved');
+        $reservation->setIsApproved(true);
+        return new JsonResponse('success', 200);
     }
 }
