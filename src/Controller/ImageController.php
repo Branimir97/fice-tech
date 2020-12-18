@@ -15,7 +15,7 @@ use Symfony\Component\Validator\Constraints\Json;
 /**
  * Class ImageController
  * @package App\Controller
- * @Route("/image")
+ * @Route("/images")
  */
 class ImageController extends AbstractController
 {
