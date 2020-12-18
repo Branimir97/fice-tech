@@ -19,32 +19,9 @@ class ReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservation::class);
     }
 
-    // /**
-    //  * @return Reservation[] Returns an array of Reservation objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('r.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
+    public function findAllAsArray() {
+        $query = $this->createQueryBuilder('r')
+            ->select('r');
+        return $query->getQuery()->getArrayResult();
     }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?Reservation
-    {
-        return $this->createQueryBuilder('r')
-            ->andWhere('r.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

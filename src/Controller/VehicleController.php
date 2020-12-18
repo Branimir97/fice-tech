@@ -28,6 +28,9 @@ class VehicleController extends AbstractController
     public function index(VehicleRepository $vehicleRepository): Response
     {
         $vehicles = $vehicleRepository->findAllAsArray();
+        if(count($vehicles) == 0) {
+            return new JsonResponse('no vehicles', 400);
+        }
         return new JsonResponse($vehicles, 200);
     }
 
