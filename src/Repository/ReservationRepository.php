@@ -20,8 +20,21 @@ class ReservationRepository extends ServiceEntityRepository
     }
 
     public function findAllAsArray() {
+        $query = $this->createQueryBuilder('r');
+        return $query->getQuery()->getArrayResult();
+    }
+
+    public function findAllApproved() {
         $query = $this->createQueryBuilder('r')
-            ->select('r');
+            ->where('r.status = :status')
+            ->setParameter('status', 'approved');
+        return $query->getQuery()->getArrayResult();
+    }
+
+    public function findAllNotApproved() {
+        $query = $this->createQueryBuilder('r')
+            ->where('r.status = :status')
+            ->setParameter('status', 'not approved');
         return $query->getQuery()->getArrayResult();
     }
 }

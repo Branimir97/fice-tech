@@ -57,7 +57,7 @@ class Vehicle
     /**
      * @ORM\Column(type="string", length=255)
      */
-    private $status;
+    private $status = 'available';
 
     /**
      * @ORM\Column(type="integer")

@@ -40,7 +40,7 @@ class VehicleController extends AbstractController
      * @return JsonResponse
      * @throws Exception
      */
-    public function createAction(Request $request): JsonResponse
+    public function insertAction(Request $request): JsonResponse
     {
         $response = json_decode($request->getContent(), true);
 
@@ -113,12 +113,11 @@ class VehicleController extends AbstractController
         $id = $request->get('id');
         $vehicle = $vehicleRepository->findOneBy(['id'=>$id]);
         if($vehicle === null) {
-            return new JsonResponse('vehicle does not exists', 400);
-        } else {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($vehicle);
-            $entityManager->flush();
-            return new JsonResponse('success', 200);
+            return new JsonResponse('vehicle does not exist', 400);
         }
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->remove($vehicle);
+        $entityManager->flush();
+        return new JsonResponse('success', 200);
     }
 }
