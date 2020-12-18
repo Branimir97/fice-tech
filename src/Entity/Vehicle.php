@@ -84,9 +84,15 @@ class Vehicle
      */
     private $cover;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Reservation::class, mappedBy="vehicle", orphanRemoval=true)
+     */
+    private $reservations;
+
     public function __construct()
     {
         $this->images = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -268,6 +274,36 @@ class Vehicle
         // set the owning side of the relation if necessary
         if ($cover->getVehicle() !== $this) {
             $cover->setVehicle($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Reservation[]
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): self
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations[] = $reservation;
+            $reservation->setVehicle($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): self
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getVehicle() === $this) {
+                $reservation->setVehicle(null);
+            }
         }
 
         return $this;
