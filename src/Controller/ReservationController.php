@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+
 
 /**
  * Class ReservationController
@@ -27,6 +29,7 @@ class ReservationController extends AbstractController
      */
     public function index(ReservationRepository $reservationRepository): Response
     {
+       $this->denyAccessUnlessGranted("ROLE_ADMIN");
        $reservations = $reservationRepository->findAllAsArray();
        if(count($reservations) == 0) {
            return new JsonResponse('no reservations', 400);
@@ -41,6 +44,7 @@ class ReservationController extends AbstractController
      */
     public function getApprovedReservationsAction(ReservationRepository $reservationRepository): Response
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $reservations = $reservationRepository->findAllApproved();
         if(count($reservations) == 0) {
             return new JsonResponse('reservations not found', 400);
@@ -55,6 +59,7 @@ class ReservationController extends AbstractController
      */
     public function getNotApprovedReservationsAction(ReservationRepository $reservationRepository): Response
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $reservations = $reservationRepository->findAllNotApproved();
         if(count($reservations) == 0) {
             return new JsonResponse('reservations not found', 400);
@@ -63,7 +68,7 @@ class ReservationController extends AbstractController
     }
 
     /**
-     * @Route("/insert/{id}", name="reservation_insert", methods={"POST"})
+     * @Route("/{id}", name="reservation_insert", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
@@ -71,6 +76,7 @@ class ReservationController extends AbstractController
      */
     public function insertAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
+        $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
         $response = json_decode($request->getContent(), true);
         $vehicle = $vehicleRepository->findOneBy(["id"=>$id]);
@@ -87,13 +93,14 @@ class ReservationController extends AbstractController
     }
 
     /**
-     * @Route("/delete/{id}", name="reservation_delete", methods={"DELETE"})
+     * @Route("/{id}", name="reservation_delete", methods={"DELETE"})
      * @param Request $request
      * @param ReservationRepository $reservationRepository
      * @return JsonResponse
      */
     public function deleteAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(['id'=>$id]);
         $vehicle = $reservation->getVehicle();
@@ -112,10 +119,11 @@ class ReservationController extends AbstractController
      * @param Request $request
      * @param ReservationRepository $reservationRepository
      * @return JsonResponse
-     * @Route("/approve/{id}", name="reservation_approve", methods={"POST"})
+     * @Route("/approve/{id}", name="reservation_approve", methods={"PATCH"})
      */
     public function changeReservationApprovalAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(["id"=>$id]);
         if($reservation->isApproved()) {

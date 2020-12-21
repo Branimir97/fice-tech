@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
+use Lcobucci\JWT\Token;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
@@ -17,6 +19,8 @@ use Symfony\Component\Validator\Constraints\Json;
 
 class SecurityController extends AbstractController
 {
+
+    private $token;
     /**
      * @Route("/login", name="app_login", methods={"POST"})
      * @param Request $request
@@ -38,16 +42,17 @@ class SecurityController extends AbstractController
             throw new BadCredentialsException();
         }
 
-        $token = $JWTEncoder
+        $this->token = $JWTEncoder
             ->encode([
                 'username' => $user->getFirstName(),
                 'exp' => time() + 3600 // 1 hour expiration
             ]);
-        return new JsonResponse(['token' => $token]);
+
+        return new JsonResponse(['token'=>$this->token]);
     }
 
     /**
-     * @Route("/logout", name="app_logout")
+      * @Route("/logout", name="app_logout")
      */
     public function logout()
     {
