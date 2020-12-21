@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Json;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+
 
 /**
  * Class ImageController
@@ -20,27 +22,7 @@ use Symfony\Component\Validator\Constraints\Json;
 class ImageController extends AbstractController
 {
     /**
-     * @Route("/delete/{id}", name="image_delete", methods={"DELETE"})
-     * @param Request $request
-     * @param ImageRepository $imageRepository
-     * @return JsonResponse
-     */
-    public function deleteAction(Request $request, ImageRepository $imageRepository): JsonResponse
-    {
-        $id = $request->get('id');
-        $image = $imageRepository->findOneBy(['id'=>$id]);
-        if($image === null) {
-            return new JsonResponse('image does not exist', 400);
-        } else {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($image);
-            $entityManager->flush();
-            return new JsonResponse('success', 200);
-        }
-    }
-
-    /**
-     * @Route("/insert/{id}", name="image_insert", methods={"PUT"})
+     * @Route("/{id}", name="image_insert", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
@@ -99,6 +81,26 @@ class ImageController extends AbstractController
             $image->setIsCover(true);
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($image);
+            $entityManager->flush();
+            return new JsonResponse('success', 200);
+        }
+    }
+
+    /**
+     * @Route("/{id}", name="image_delete", methods={"DELETE"})
+     * @param Request $request
+     * @param ImageRepository $imageRepository
+     * @return JsonResponse
+     */
+    public function deleteAction(Request $request, ImageRepository $imageRepository): JsonResponse
+    {
+        $id = $request->get('id');
+        $image = $imageRepository->findOneBy(['id'=>$id]);
+        if($image === null) {
+            return new JsonResponse('image does not exist', 400);
+        } else {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($image);
             $entityManager->flush();
             return new JsonResponse('success', 200);
         }
