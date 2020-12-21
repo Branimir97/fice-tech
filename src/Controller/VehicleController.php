@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Json;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+
 
 /**
  * Class VehicleController
@@ -35,15 +37,15 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/insert", name="vehicle_insert", methods={"POST"})
+     * @Route("/", name="vehicle_insert", methods={"POST"})
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
      */
     public function insertAction(Request $request): JsonResponse
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $response = json_decode($request->getContent(), true);
-
         $vehicle = new Vehicle();
         $vehicle->setMark($response['mark']);
         $vehicle->setModel($response['model']);
@@ -72,7 +74,7 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/update/{id}", name="vehicle_update", methods={"PUT"})
+     * @Route("/{id}", name="vehicle_update", methods={"PUT"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
@@ -80,6 +82,7 @@ class VehicleController extends AbstractController
      */
     public function updateAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $response = json_decode($request->getContent(), true);
 
@@ -103,13 +106,14 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/delete/{id}", name="vehicle_delete", methods={"DELETE"})
+     * @Route("/{id}", name="vehicle_delete", methods={"DELETE"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
      */
     public function deleteAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $vehicle = $vehicleRepository->findOneBy(['id'=>$id]);
         if($vehicle === null) {
