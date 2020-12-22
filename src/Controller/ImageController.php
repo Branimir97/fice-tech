@@ -13,7 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Validator\Constraints\Json;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
-
 /**
  * Class ImageController
  * @package App\Controller
@@ -42,6 +41,26 @@ class ImageController extends AbstractController
             $entityManager->flush();
         }
         return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @Route("/{id}", name="image_delete", methods={"DELETE"})
+     * @param Request $request
+     * @param ImageRepository $imageRepository
+     * @return JsonResponse
+     */
+    public function deleteAction(Request $request, ImageRepository $imageRepository): JsonResponse
+    {
+        $id = $request->get('id');
+        $image = $imageRepository->findOneBy(['id'=>$id]);
+        if($image === null) {
+            return new JsonResponse('image does not exist', 400);
+        } else {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($image);
+            $entityManager->flush();
+            return new JsonResponse('success', 200);
+        }
     }
 
     /**
@@ -81,26 +100,6 @@ class ImageController extends AbstractController
             $image->setIsCover(true);
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($image);
-            $entityManager->flush();
-            return new JsonResponse('success', 200);
-        }
-    }
-
-    /**
-     * @Route("/{id}", name="image_delete", methods={"DELETE"})
-     * @param Request $request
-     * @param ImageRepository $imageRepository
-     * @return JsonResponse
-     */
-    public function deleteAction(Request $request, ImageRepository $imageRepository): JsonResponse
-    {
-        $id = $request->get('id');
-        $image = $imageRepository->findOneBy(['id'=>$id]);
-        if($image === null) {
-            return new JsonResponse('image does not exist', 400);
-        } else {
-            $entityManager = $this->getDoctrine()->getManager();
-            $entityManager->remove($image);
             $entityManager->flush();
             return new JsonResponse('success', 200);
         }
