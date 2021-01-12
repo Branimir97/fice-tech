@@ -44,6 +44,16 @@ class Reservation
      */
     private $isApproved = false;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $paymentMethod;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $paymentAmount;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -105,5 +115,29 @@ class Reservation
     public function setIsApproved(bool $isApproved): void
     {
         $this->isApproved = $isApproved;
+    }
+
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(string $paymentMethod): self
+    {
+        $this->paymentMethod = $paymentMethod;
+
+        return $this;
+    }
+
+    public function getPaymentAmount(): ?float
+    {
+        return $this->paymentAmount;
+    }
+
+    public function setPaymentAmount(?float $paymentAmount): self
+    {
+        $this->paymentAmount = $paymentAmount;
+
+        return $this;
     }
 }
