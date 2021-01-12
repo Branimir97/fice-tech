@@ -85,6 +85,14 @@ class ReservationController extends AbstractController
         $reservation->setVehicle($vehicle);
         $reservation->setStartTime(new \DateTime($response['startTime']));
         $reservation->setEndTime((new \DateTime($response['endTime'])));
+        $reservation->setPaymentMethod($response['paymentMethod']);
+        if($response['paymentMethod']=='cash') {
+            if(isset($response['paymentAmount']))
+                $reservation->setPaymentAmount($response['paymentAmount']);
+            else {
+                return new JsonResponse('payment amount must be defined if user pays with cash', 400);
+            }
+        }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($reservation);
         $entityManager->flush();
