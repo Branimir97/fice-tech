@@ -135,4 +135,13 @@ class VehicleController extends AbstractController
         $entityManager->flush();
         return new JsonResponse('success', 200);
     }
+
+    /**
+     * @Route("/filter", name="vehicle_filter", methods={"POST"})
+     * @param Request $request
+     * @param VehicleRepository $vehicleRepository
+     */
+    public function filterAction(Request $request, VehicleRepository $vehicleRepository) {
+
+    }
 }

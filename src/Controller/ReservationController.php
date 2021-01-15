@@ -63,6 +63,10 @@ class ReservationController extends AbstractController
                 return new JsonResponse('payment amount must be defined if user pays with cash', 400);
             }
         }
+        $allowedStatus = ['accepted', 'rejected', 'waiting'];
+        if(!in_array($response['status'], $allowedStatus)) {
+            return new JsonResponse('not allowed status name', 400);
+        }
         $reservation->setStatus($response['status']);
         $reservation->setInfo($response['info']);
         $entityManager = $this->getDoctrine()->getManager();
@@ -86,10 +90,7 @@ class ReservationController extends AbstractController
         if($reservation === null) {
             return new JsonResponse('reservation does not exist', 400);
         }
-        $vehicle = $reservation->getVehicle();
         $entityManager = $this->getDoctrine()->getManager();
-        $vehicle->setStatus('available');
-        $entityManager->persist($vehicle);
         $entityManager->remove($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
@@ -118,8 +119,15 @@ class ReservationController extends AbstractController
                 return new JsonResponse('reservation is already '.$response['status'], 200);
             }
         }
+        $vehicle = $reservation->getVehicle();
         $reservation->setStatus($response['status']);
+        if($reservation->getStatus()==="accepted") {
+            $vehicle->setStatus("Reserved");
+        } else if($reservation->getStatus() == "rejected" || $reservation->getStatus() == "waiting") {
+            $vehicle->setStatus("Available");
+        }
         $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($vehicle);
         $entityManager->persist($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
