@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Image;
 use App\Entity\Vehicle;
+use App\Repository\CarRentalRepository;
 use App\Repository\VehicleRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,7 +43,7 @@ class VehicleController extends AbstractController
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertAction(Request $request): JsonResponse
+    public function insertAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $response = json_decode($request->getContent(), true);
@@ -58,6 +59,16 @@ class VehicleController extends AbstractController
         $vehicle->setPower($response['power']);
         $vehicle->setType($response['type']);
         $vehicle->setPrice($response['price']);
+        $vehicle->setFuelType($response['fuelType']);
+        $vehicle->setGateNumber($response['gateNumber']);
+        if(isset($response['discount'])) {
+            $vehicle->setDiscount($response['discount']);
+        }
+        $carRentalObject = $carRentalRepository->findOneBy(['id'=>$response['carRental']]);
+        if($carRentalObject===null) {
+            return new JsonResponse('car rental company does not exist', 400);
+        }
+        $vehicle->setCarRental($carRentalObject);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($vehicle);
         $entityManager->flush();

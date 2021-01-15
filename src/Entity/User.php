@@ -71,9 +71,15 @@ class User implements UserInterface
      */
     private $updatedAt;
 
+    /**
+     * @ORM\OneToMany(targetEntity=CarRental::class, mappedBy="owner")
+     */
+    private $carRentals;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
+        $this->carRentals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -240,6 +246,36 @@ class User implements UserInterface
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CarRental[]
+     */
+    public function getCarRentals(): Collection
+    {
+        return $this->carRentals;
+    }
+
+    public function addCarRental(CarRental $carRental): self
+    {
+        if (!$this->carRentals->contains($carRental)) {
+            $this->carRentals[] = $carRental;
+            $carRental->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCarRental(CarRental $carRental): self
+    {
+        if ($this->carRentals->removeElement($carRental)) {
+            // set the owning side to null (unless already changed)
+            if ($carRental->getOwner() === $this) {
+                $carRental->setOwner(null);
+            }
+        }
 
         return $this;
     }
