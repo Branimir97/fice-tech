@@ -90,37 +90,6 @@ class Vehicle
      */
     private $reservations;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $fuelType;
-
-    /**
-     * @ORM\Column(type="integer")
-     */
-    private $gateNumber;
-
-    /**
-     * @ORM\Column(type="float")
-     */
-    private $discount;
-
-    /**
-     * @ORM\ManyToOne(targetEntity=CarRental::class, inversedBy="vehicles")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $carRental;
-
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $createdAt;
-
-    /**
-     * @ORM\Column(type="datetime", nullable=true)
-     */
-    private $updatedAt;
-
     public function __construct()
     {
         $this->images = new ArrayCollection();
@@ -341,75 +310,4 @@ class Vehicle
         return $this;
     }
 
-    public function getFuelType(): ?string
-    {
-        return $this->fuelType;
-    }
-
-    public function setFuelType(string $fuelType): self
-    {
-        $this->fuelType = $fuelType;
-
-        return $this;
-    }
-
-    public function getGateNumber(): ?int
-    {
-        return $this->gateNumber;
-    }
-
-    public function setGateNumber(int $gateNumber): self
-    {
-        $this->gateNumber = $gateNumber;
-
-        return $this;
-    }
-
-    public function getDiscount(): ?float
-    {
-        return $this->discount;
-    }
-
-    public function setDiscount(float $discount): self
-    {
-        $this->discount = $discount;
-
-        return $this;
-    }
-
-    public function getCarRental(): ?CarRental
-    {
-        return $this->carRental;
-    }
-
-    public function setCarRental(?CarRental $carRental): self
-    {
-        $this->carRental = $carRental;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeInterface
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
 }

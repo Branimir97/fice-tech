@@ -59,16 +59,6 @@ class CarRental
      */
     private $updatedAt;
 
-    /**
-     * @ORM\OneToMany(targetEntity=Vehicle::class, mappedBy="carRental")
-     */
-    private $vehicles;
-
-    public function __construct()
-    {
-        $this->vehicles = new ArrayCollection();
-    }
-
     public function getId(): ?int
     {
         return $this->id;
@@ -166,36 +156,6 @@ class CarRental
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Vehicle[]
-     */
-    public function getVehicles(): Collection
-    {
-        return $this->vehicles;
-    }
-
-    public function addVehicle(Vehicle $vehicle): self
-    {
-        if (!$this->vehicles->contains($vehicle)) {
-            $this->vehicles[] = $vehicle;
-            $vehicle->setCarRental($this);
-        }
-
-        return $this;
-    }
-
-    public function removeVehicle(Vehicle $vehicle): self
-    {
-        if ($this->vehicles->removeElement($vehicle)) {
-            // set the owning side to null (unless already changed)
-            if ($vehicle->getCarRental() === $this) {
-                $vehicle->setCarRental(null);
-            }
-        }
 
         return $this;
     }
