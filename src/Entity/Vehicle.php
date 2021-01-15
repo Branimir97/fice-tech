@@ -81,11 +81,6 @@ class Vehicle
     private $images;
 
     /**
-     * @ORM\OneToOne(targetEntity=Cover::class, mappedBy="vehicle", cascade={"persist", "remove"})
-     */
-    private $cover;
-
-    /**
      * @ORM\OneToMany(targetEntity=Reservation::class, mappedBy="vehicle", orphanRemoval=true)
      */
     private $reservations;
@@ -291,23 +286,6 @@ class Vehicle
             if ($image->getVehicle() === $this) {
                 $image->setVehicle(null);
             }
-        }
-
-        return $this;
-    }
-
-    public function getCover(): ?Cover
-    {
-        return $this->cover;
-    }
-
-    public function setCover(Cover $cover): self
-    {
-        $this->cover = $cover;
-
-        // set the owning side of the relation if necessary
-        if ($cover->getVehicle() !== $this) {
-            $cover->setVehicle($this);
         }
 
         return $this;

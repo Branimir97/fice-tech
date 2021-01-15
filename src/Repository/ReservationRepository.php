@@ -28,10 +28,10 @@ class ReservationRepository extends ServiceEntityRepository
         return $query->getQuery()->getArrayResult();
     }
 
-    public function findAllApproved() {
+    public function findAllStatusWaiting() {
         $query = $this->createQueryBuilder('r')
-            ->where('r.isApproved = :status')
-            ->setParameter('status', true)
+            ->where('r.status = :status')
+            ->setParameter('status', "waiting")
             ->join('r.user', 'u')
             ->join('r.vehicle', 'v')
             ->addSelect('u')
@@ -39,14 +39,4 @@ class ReservationRepository extends ServiceEntityRepository
         return $query->getQuery()->getArrayResult();
     }
 
-    public function findAllNotApproved() {
-        $query = $this->createQueryBuilder('r')
-            ->where('r.isApproved = :status')
-            ->setParameter('status', false)
-            ->join('r.user', 'u')
-            ->join('r.vehicle', 'v')
-            ->addSelect('u')
-            ->addSelect('v');
-        return $query->getQuery()->getArrayResult();
-    }
 }

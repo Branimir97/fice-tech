@@ -38,36 +38,6 @@ class ReservationController extends AbstractController
     }
 
     /**
-     * @Route("/approved", name="reservation_list_approved", methods={"GET"})
-     * @param ReservationRepository $reservationRepository
-     * @return Response
-     */
-    public function getApprovedReservationsAction(ReservationRepository $reservationRepository): Response
-    {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
-        $reservations = $reservationRepository->findAllApproved();
-        if(count($reservations) == 0) {
-            return new JsonResponse('reservations not found', 400);
-        }
-        return new JsonResponse($reservations, 200);
-    }
-
-    /**
-     * @Route("/notapproved", name="reservation_list_notapproved", methods={"GET"})
-     * @param ReservationRepository $reservationRepository
-     * @return Response
-     */
-    public function getNotApprovedReservationsAction(ReservationRepository $reservationRepository): Response
-    {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
-        $reservations = $reservationRepository->findAllNotApproved();
-        if(count($reservations) == 0) {
-            return new JsonResponse('reservations not found', 400);
-        }
-        return new JsonResponse($reservations, 200);
-    }
-
-    /**
      * @Route("/{id}", name="reservation_insert", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
@@ -93,6 +63,8 @@ class ReservationController extends AbstractController
                 return new JsonResponse('payment amount must be defined if user pays with cash', 400);
             }
         }
+        $reservation->setStatus($response['status']);
+        $reservation->setInfo($response['info']);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($reservation);
         $entityManager->flush();
@@ -111,10 +83,10 @@ class ReservationController extends AbstractController
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(['id'=>$id]);
-        $vehicle = $reservation->getVehicle();
         if($reservation === null) {
             return new JsonResponse('reservation does not exist', 400);
         }
+        $vehicle = $reservation->getVehicle();
         $entityManager = $this->getDoctrine()->getManager();
         $vehicle->setStatus('available');
         $entityManager->persist($vehicle);
@@ -127,23 +99,44 @@ class ReservationController extends AbstractController
      * @param Request $request
      * @param ReservationRepository $reservationRepository
      * @return JsonResponse
-     * @Route("/approve/{id}", name="reservation_approve", methods={"PATCH"})
+     * @Route("/update/{id}", name="reservation_update", methods={"PATCH"})
      */
-    public function changeReservationApprovalAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
+    public function changeReservationStatus(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
+        $response = json_decode($request->getContent(), true);
         $reservation = $reservationRepository->findOneBy(["id"=>$id]);
-        if($reservation->isApproved()) {
-            return new JsonResponse('reservation is already approved', 400);
+        if($reservation === null) {
+            return new JsonResponse('reservation does not exist', 200);
         }
-        $vehicle = $reservation->getVehicle();
-        $vehicle->setStatus('Reserved');
-        $reservation->setIsApproved(true);
+        $allowedStatus = ['accepted', 'rejected', 'waiting'];
+        if(!in_array($response['status'], $allowedStatus)) {
+           return new JsonResponse('not allowed status name', 400);
+        } else {
+            if($reservation->getStatus() == $response['status']) {
+                return new JsonResponse('reservation is already '.$response['status'], 200);
+            }
+        }
+        $reservation->setStatus($response['status']);
         $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->persist($vehicle);
         $entityManager->persist($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @Route("/waiting", name="reservations_waiting", methods={"GET"})
+     * @param ReservationRepository $reservationRepository
+     * @return JsonResponse
+     */
+    public function getStatusWaitingReservations(ReservationRepository $reservationRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $reservations = $reservationRepository->findAllStatusWaiting();
+        if(count($reservations)== 0) {
+            return new JsonResponse('there are no reservations with waiting status', 400);
+        }
+        return new JsonResponse($reservations, 200);
     }
 }
