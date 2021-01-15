@@ -40,11 +40,6 @@ class Reservation
     private $vehicle;
 
     /**
-     * @ORM\Column(type="boolean")
-     */
-    private $isApproved = false;
-
-    /**
      * @ORM\Column(type="string", length=255)
      */
     private $paymentMethod;
@@ -105,16 +100,6 @@ class Reservation
         $this->vehicle = $vehicle;
 
         return $this;
-    }
-
-    public function isApproved(): bool
-    {
-        return $this->isApproved;
-    }
-
-    public function setIsApproved(bool $isApproved): void
-    {
-        $this->isApproved = $isApproved;
     }
 
     public function getPaymentMethod(): ?string
