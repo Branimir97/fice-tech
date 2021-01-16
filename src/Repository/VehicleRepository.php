@@ -20,12 +20,27 @@ class VehicleRepository extends ServiceEntityRepository
     }
 
     public function findAllAsArray() {
-        $query = $this->createQueryBuilder('v')
+        return $this->createQueryBuilder('v')
             ->where('v.status = :status')
             ->setParameter('status', 'Available')
             ->join('v.images', 'i')
-            ->addSelect('i');
+            ->addSelect('i')
+            ->getQuery()
+            ->getArrayResult();
+    }
 
-        return $query->getQuery()->getArrayResult();
+    public function filterFreeVehicles($start, $end) {
+        $startDate = new \DateTime($start);
+        $endDate = new \DateTime($end);
+        return $this->createQueryBuilder('v')
+            ->where('v.status != :status')
+            ->setParameter('status', "Reserved")
+            ->join('v.reservations', 'r')
+            ->Andwhere('r.startTime NOT BETWEEN :start AND :end')
+            ->Andwhere('r.endTime NOT BETWEEN :start AND :end')
+            ->setParameter('start', $startDate)
+            ->setParameter('end', $endDate)
+            ->getQuery()
+            ->getArrayResult();
     }
 }

@@ -6,6 +6,7 @@ use App\Repository\VehicleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity(repositoryClass=VehicleRepository::class)
@@ -80,14 +81,42 @@ class Vehicle
     private $images;
 
     /**
-     * @ORM\OneToOne(targetEntity=Cover::class, mappedBy="vehicle", cascade={"persist", "remove"})
-     */
-    private $cover;
-
-    /**
      * @ORM\OneToMany(targetEntity=Reservation::class, mappedBy="vehicle", orphanRemoval=true)
      */
     private $reservations;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $fuelType;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $gateNumber;
+
+    /**
+     * @ORM\Column(type="float", nullable=true)
+     */
+    private $discount;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=CarRental::class, inversedBy="vehicles")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $carRental;
+
+    /**
+     * @ORM\Column(type="datetime")
+     * @Gedmo\Timestampable(on="create")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     * @Gedmo\Timestampable(on="update")
+     */
+    private $updatedAt;
 
     public function __construct()
     {
@@ -262,23 +291,6 @@ class Vehicle
         return $this;
     }
 
-    public function getCover(): ?Cover
-    {
-        return $this->cover;
-    }
-
-    public function setCover(Cover $cover): self
-    {
-        $this->cover = $cover;
-
-        // set the owning side of the relation if necessary
-        if ($cover->getVehicle() !== $this) {
-            $cover->setVehicle($this);
-        }
-
-        return $this;
-    }
-
     /**
      * @return Collection|Reservation[]
      */
@@ -308,4 +320,77 @@ class Vehicle
 
         return $this;
     }
+
+    public function getFuelType(): ?string
+    {
+        return $this->fuelType;
+    }
+
+    public function setFuelType(string $fuelType): self
+    {
+        $this->fuelType = $fuelType;
+
+        return $this;
+    }
+
+    public function getGateNumber(): ?int
+    {
+        return $this->gateNumber;
+    }
+
+    public function setGateNumber(int $gateNumber): self
+    {
+        $this->gateNumber = $gateNumber;
+
+        return $this;
+    }
+
+    public function getDiscount(): ?float
+    {
+        return $this->discount;
+    }
+
+    public function setDiscount(float $discount): self
+    {
+        $this->discount = $discount;
+
+        return $this;
+    }
+
+    public function getCarRental(): ?CarRental
+    {
+        return $this->carRental;
+    }
+
+    public function setCarRental(?CarRental $carRental): self
+    {
+        $this->carRental = $carRental;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
 }

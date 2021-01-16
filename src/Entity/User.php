@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity(repositoryClass=UserRepository::class)
@@ -58,9 +59,27 @@ class User implements UserInterface
      */
     private $reservations;
 
+    /**
+     * @ORM\Column(type="datetime")
+     * @Gedmo\Timestampable(on="create")
+     */
+    private $createdAt;
+
+    /**
+     * @ORM\Column(type="datetime", nullable=true)
+     * @Gedmo\Timestampable(on="update")
+     */
+    private $updatedAt;
+
+    /**
+     * @ORM\OneToMany(targetEntity=CarRental::class, mappedBy="owner")
+     */
+    private $carRentals;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
+        $this->carRentals = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -201,6 +220,60 @@ class User implements UserInterface
             // set the owning side to null (unless already changed)
             if ($reservation->getUser() === $this) {
                 $reservation->setUser(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CarRental[]
+     */
+    public function getCarRentals(): Collection
+    {
+        return $this->carRentals;
+    }
+
+    public function addCarRental(CarRental $carRental): self
+    {
+        if (!$this->carRentals->contains($carRental)) {
+            $this->carRentals[] = $carRental;
+            $carRental->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCarRental(CarRental $carRental): self
+    {
+        if ($this->carRentals->removeElement($carRental)) {
+            // set the owning side to null (unless already changed)
+            if ($carRental->getOwner() === $this) {
+                $carRental->setOwner(null);
             }
         }
 

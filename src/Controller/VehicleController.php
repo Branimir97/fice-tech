@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Image;
 use App\Entity\Vehicle;
+use App\Repository\CarRentalRepository;
 use App\Repository\VehicleRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,7 +43,7 @@ class VehicleController extends AbstractController
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertAction(Request $request): JsonResponse
+    public function insertAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $response = json_decode($request->getContent(), true);
@@ -58,6 +59,16 @@ class VehicleController extends AbstractController
         $vehicle->setPower($response['power']);
         $vehicle->setType($response['type']);
         $vehicle->setPrice($response['price']);
+        $vehicle->setFuelType($response['fuelType']);
+        $vehicle->setGateNumber($response['gateNumber']);
+        if(isset($response['discount'])) {
+            $vehicle->setDiscount($response['discount']);
+        }
+        $carRentalObject = $carRentalRepository->findOneBy(['id'=>$response['carRental']]);
+        if($carRentalObject===null) {
+            return new JsonResponse('car rental company does not exist', 400);
+        }
+        $vehicle->setCarRental($carRentalObject);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($vehicle);
         $entityManager->flush();
@@ -123,5 +134,22 @@ class VehicleController extends AbstractController
         $entityManager->remove($vehicle);
         $entityManager->flush();
         return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @Route("/filter", name="vehicle_filter", methods={"POST"})
+     * @param Request $request
+     * @param VehicleRepository $vehicleRepository
+     * @return JsonResponse
+     */
+    public function filterAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $response = json_decode($request->getContent(), true);
+        $vehicles = $vehicleRepository->filterFreeVehicles($response['startTime'], $response['endTime']);
+        if($vehicles === null) {
+            return new JsonResponse('noone vehicle available in that date span', 400);
+        }
+        return new JsonResponse($vehicles, 200);
     }
 }
