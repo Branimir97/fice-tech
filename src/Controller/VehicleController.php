@@ -140,8 +140,16 @@ class VehicleController extends AbstractController
      * @Route("/filter", name="vehicle_filter", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
+     * @return JsonResponse
      */
-    public function filterAction(Request $request, VehicleRepository $vehicleRepository) {
-
+    public function filterAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $response = json_decode($request->getContent(), true);
+        $vehicles = $vehicleRepository->filterFreeVehicles($response['startTime'], $response['endTime']);
+        if($vehicles === null) {
+            return new JsonResponse('noone vehicle available in that date span', 400);
+        }
+        return new JsonResponse($vehicles, 200);
     }
 }
