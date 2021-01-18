@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Repository\UserRepository;
-use App\Entity\Token as TokenEntity;
 use Lcobucci\JWT\Token;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTEncodeFailureException;
@@ -50,7 +49,7 @@ class SecurityController extends AbstractController
             ]);
 
         $entityManager = $this->getDoctrine()->getManager();
-        $token = new TokenEntity();
+        $token = new \App\Entity\Token();
         $token->setValue($this->token);
         $entityManager->persist($token);
         $entityManager->flush();

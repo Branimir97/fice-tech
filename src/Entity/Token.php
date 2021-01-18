@@ -19,11 +19,6 @@ class Token
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $value;
-
-    /**
      * @ORM\Column(type="datetime")
      * @Gedmo\Timestampable(on="create")
      */
@@ -35,21 +30,14 @@ class Token
      */
     private $updatedAt;
 
+    /**
+     * @ORM\Column(type="text")
+     */
+    private $value;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getValue(): ?string
-    {
-        return $this->value;
-    }
-
-    public function setValue(string $value): self
-    {
-        $this->value = $value;
-
-        return $this;
     }
 
     public function getCreatedAt(): ?\DateTimeInterface
@@ -72,6 +60,18 @@ class Token
     public function setUpdatedAt(\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    public function getValue(): ?string
+    {
+        return $this->value;
+    }
+
+    public function setValue(string $value): self
+    {
+        $this->value = $value;
 
         return $this;
     }
