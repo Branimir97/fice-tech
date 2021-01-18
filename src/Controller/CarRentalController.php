@@ -18,7 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class CarRentalController extends AbstractController
 {
-
     /**
      * @Route("/", name="carrental_insert", methods={"POST"})
      * @param Request $request
@@ -82,6 +81,5 @@ class CarRentalController extends AbstractController
             return new JsonResponse('no car rental company found by id '.$id, 400);
         }
         return new JsonResponse($carRentalCompany, 200);
-
     }
 }

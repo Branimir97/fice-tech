@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Image;
 use App\Entity\Vehicle;
 use App\Repository\CarRentalRepository;
+use App\Repository\ImageRepository;
 use App\Repository\VehicleRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -40,6 +41,7 @@ class VehicleController extends AbstractController
     /**
      * @Route("/", name="vehicle_insert", methods={"POST"})
      * @param Request $request
+     * @param CarRentalRepository $carRentalRepository
      * @return JsonResponse
      * @throws Exception
      */
@@ -64,11 +66,9 @@ class VehicleController extends AbstractController
         if(isset($response['discount'])) {
             $vehicle->setDiscount($response['discount']);
         }
-        $carRentalObject = $carRentalRepository->findOneBy(['id'=>$response['carRental']]);
-        if($carRentalObject===null) {
-            return new JsonResponse('car rental company does not exist', 400);
-        }
-        $vehicle->setCarRental($carRentalObject);
+        $user = $this->getUser();
+        $carRental = $carRentalRepository->findOneBy(['owner'=>$user]);
+        $vehicle->setCarRental($carRental);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($vehicle);
         $entityManager->flush();
@@ -91,7 +91,7 @@ class VehicleController extends AbstractController
      * @return JsonResponse
      * @throws Exception
      */
-    public function updateAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function updateAction(Request $request, VehicleRepository $vehicleRepository, ImageRepository $imageRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
@@ -109,10 +109,30 @@ class VehicleController extends AbstractController
         $vehicle->setPower($response['power']);
         $vehicle->setType($response['type']);
         $vehicle->setPrice($response['price']);
+        $vehicle->setFuelType($response['fuelType']);
+        $vehicle->setGateNumber($response['gateNumber']);
+        if(isset($response['discount'])) {
+            $vehicle->setDiscount($response['discount']);
+        }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($vehicle);
         $entityManager->flush();
 
+        if(isset($response['images'])) {
+            $images = $imageRepository->findBy(['vehicle'=>$vehicle]);
+            foreach($images as $image) {
+                $entityManager->remove($image);
+                $entityManager->flush();
+            }
+            foreach($response['images'] as $imageResponse) {
+                $image = new Image();
+                $image->setIsCover($imageResponse['isCover']);
+                $image->setBase64($imageResponse['base64']);
+                $image->setVehicle($vehicle);
+                $entityManager->persist($image);
+                $entityManager->flush();
+            }
+        }
         return new JsonResponse('success', 201);
     }
 
