@@ -18,19 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class CarRentalController extends AbstractController
 {
-    /**
-     * @Route("/", name="carrental_list", methods={"GET"})
-     * @param CarRentalRepository $carRentalRepository
-     * @return Response
-     */
-    public function index(CarRentalRepository $carRentalRepository): Response
-    {
-        $carRentalCompanies = $carRentalRepository->findAllAsArray();
-        if(count($carRentalCompanies) == 0) {
-            return new JsonResponse('no car rental companies', 400);
-        }
-        return new JsonResponse($carRentalCompanies, 200);
-    }
 
     /**
      * @Route("/", name="carrental_insert", methods={"POST"})

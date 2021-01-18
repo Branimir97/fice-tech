@@ -19,12 +19,6 @@ class CarRentalRepository extends ServiceEntityRepository
         parent::__construct($registry, CarRental::class);
     }
 
-    public function findAllAsArray() {
-        return $this->createQueryBuilder('c')
-            ->getQuery()
-            ->getArrayResult();
-    }
-
     public function findOneById($id) {
         return $this->createQueryBuilder('c')
             ->where('c.id =:parameter')
