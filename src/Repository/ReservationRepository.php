@@ -20,23 +20,22 @@ class ReservationRepository extends ServiceEntityRepository
     }
 
     public function findAllAsArray() {
-        $query = $this->createQueryBuilder('r')
+        return $this->createQueryBuilder('r')
             ->join('r.user', 'u')
             ->join('r.vehicle', 'v')
             ->addSelect('u')
-            ->addSelect('v');
-        return $query->getQuery()->getArrayResult();
+            ->addSelect('v')
+            ->getQuery()
+            ->getArrayResult();
     }
 
-    public function findAllStatusWaiting() {
-        $query = $this->createQueryBuilder('r')
-            ->where('r.status = :status')
-            ->setParameter('status', "waiting")
-            ->join('r.user', 'u')
+    public function findByUserId($id) {
+        return $this->createQueryBuilder('r')
             ->join('r.vehicle', 'v')
-            ->addSelect('u')
-            ->addSelect('v');
-        return $query->getQuery()->getArrayResult();
+            ->where('r.user =:user_id')
+            ->setParameter('user_id', $id)
+            ->addSelect('v')
+            ->getQuery()
+            ->getArrayResult();
     }
-
 }

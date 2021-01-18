@@ -63,11 +63,7 @@ class ReservationController extends AbstractController
                 return new JsonResponse('payment amount must be defined if user pays with cash', 400);
             }
         }
-        $allowedStatus = ['accepted', 'rejected', 'waiting'];
-        if(!in_array($response['status'], $allowedStatus)) {
-            return new JsonResponse('not allowed status name', 400);
-        }
-        $reservation->setStatus($response['status']);
+        $reservation->setStatus("waiting");
         $reservation->setInfo($response['info']);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($reservation);
@@ -94,6 +90,21 @@ class ReservationController extends AbstractController
         $entityManager->remove($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @Route("/me", name="reservation_list_by_user", methods={"GET"})
+     * @param ReservationRepository $reservationRepository
+     * @return JsonResponse
+     */
+    public function getByUserAction(ReservationRepository $reservationRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted("ROLE_USER");
+        $reservations = $reservationRepository->findByUserId($this->getUser());
+        if(count($reservations) == 0) {
+            return new JsonResponse('no reservations', 400);
+        }
+        return new JsonResponse($reservations, 200);
     }
 
     /**
@@ -131,20 +142,5 @@ class ReservationController extends AbstractController
         $entityManager->persist($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
-    }
-
-    /**
-     * @Route("/waiting", name="reservations_waiting", methods={"GET"})
-     * @param ReservationRepository $reservationRepository
-     * @return JsonResponse
-     */
-    public function getStatusWaitingReservations(ReservationRepository $reservationRepository): JsonResponse
-    {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
-        $reservations = $reservationRepository->findAllStatusWaiting();
-        if(count($reservations)== 0) {
-            return new JsonResponse('there are no reservations with waiting status', 400);
-        }
-        return new JsonResponse($reservations, 200);
     }
 }

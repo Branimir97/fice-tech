@@ -162,14 +162,31 @@ class VehicleController extends AbstractController
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
      */
-    public function filterAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function filterByLocationAndDatesAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $response = json_decode($request->getContent(), true);
-        $vehicles = $vehicleRepository->filterFreeVehicles($response['startTime'], $response['endTime']);
+        $vehicles = $vehicleRepository->filterAvailableVehiclesByLocationAndDates($response['startTime'], $response['endTime']);
         if($vehicles === null) {
-            return new JsonResponse('noone vehicle available in that date span', 400);
+            return new JsonResponse('v', 400);
         }
         return new JsonResponse($vehicles, 200);
+    }
+
+    /**
+     * @Route("/filter/{id}", name="vehicle_filter", methods={"GET"})
+     * @param Request $request
+     * @param VehicleRepository $vehicleRepository
+     * @return JsonResponse
+     */
+    public function filterByCarRentalAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $id = $request->get('id');
+        $vehicles = $vehicleRepository->filterAvailableVehiclesByCarRental($id);
+        if(count($vehicles) == 0) {
+            return new JsonResponse('no vehicles', 400);
+        }
+        return new JsonResponse($vehicles, 400);
     }
 }
