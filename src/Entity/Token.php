@@ -4,6 +4,7 @@ namespace App\Entity;
 
 use App\Repository\TokenRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
  * @ORM\Entity(repositoryClass=TokenRepository::class)
@@ -24,11 +25,13 @@ class Token
 
     /**
      * @ORM\Column(type="datetime")
+     * @Gedmo\Timestampable(on="create")
      */
     private $createdAt;
 
     /**
      * @ORM\Column(type="datetime")
+     * @Gedmo\Timestampable(on="update")
      */
     private $updatedAt;
 

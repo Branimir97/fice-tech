@@ -73,15 +73,9 @@ class CarRental
      */
     private $image;
 
-    /**
-     * @ORM\ManyToMany(targetEntity=Reservation::class, mappedBy="carRental")
-     */
-    private $reservations;
-
     public function __construct()
     {
         $this->vehicles = new ArrayCollection();
-        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -223,33 +217,6 @@ class CarRental
     public function setImage(string $image): self
     {
         $this->image = $image;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection|Reservation[]
-     */
-    public function getReservations(): Collection
-    {
-        return $this->reservations;
-    }
-
-    public function addReservation(Reservation $reservation): self
-    {
-        if (!$this->reservations->contains($reservation)) {
-            $this->reservations[] = $reservation;
-            $reservation->addCarRental($this);
-        }
-
-        return $this;
-    }
-
-    public function removeReservation(Reservation $reservation): self
-    {
-        if ($this->reservations->removeElement($reservation)) {
-            $reservation->removeCarRental($this);
-        }
 
         return $this;
     }
