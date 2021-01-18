@@ -30,16 +30,13 @@ class CarRentalController extends AbstractController
         $response = json_decode($request->getContent(), true);
         $carRental = new CarRental();
         $carRental->setName($response['name']);
-        $userOwner = $userRepository->findOneBy(['id'=>$response['ownerId']]);
-        if($userOwner === null) {
-            return new JsonResponse('owner does not exist', 400);
-        }
-        $carRental->setOwner($userOwner);
+        $user = $this->getUser();
+        $carRental->setOwner($user);
         $carRental->setCity($response['city']);
         $carRental->setAddress($response['address']);
         $carRental->setContactNumber($response['contactNumber']);
         $carRental->setEmail($response['email']);
-
+        $carRental->setImage($response['image']);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($carRental);
         $entityManager->flush();
