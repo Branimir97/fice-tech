@@ -164,11 +164,12 @@ class VehicleController extends AbstractController
      */
     public function filterByLocationAndDatesAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $this->denyAccessUnlessGranted("ROLE_USER");
         $response = json_decode($request->getContent(), true);
-        $vehicles = $vehicleRepository->filterAvailableVehiclesByLocationAndDates($response['startTime'], $response['endTime']);
-        if($vehicles === null) {
-            return new JsonResponse('v', 400);
+        $vehicles = $vehicleRepository->filterAvailableVehiclesByLocationAndDates(
+            $response['location'], $response['startTime'], $response['endTime']);
+        if(count($vehicles) == 0) {
+            return new JsonResponse('no vehicles', 400);
         }
         return new JsonResponse($vehicles, 200);
     }
@@ -181,7 +182,7 @@ class VehicleController extends AbstractController
      */
     public function filterByCarRentalAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
         $vehicles = $vehicleRepository->filterAvailableVehiclesByCarRental($id);
         if(count($vehicles) == 0) {

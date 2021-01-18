@@ -29,17 +29,20 @@ class VehicleRepository extends ServiceEntityRepository
             ->getArrayResult();
     }
 
-    public function filterAvailableVehiclesByLocationAndDates($start, $end) {
+    public function filterAvailableVehiclesByLocationAndDates($location, $start, $end) {
         $startDate = new \DateTime($start);
         $endDate = new \DateTime($end);
         return $this->createQueryBuilder('v')
             ->where('v.status != :status')
             ->setParameter('status', "Reserved")
             ->join('v.reservations', 'r')
-            ->Andwhere('r.startTime NOT BETWEEN :start AND :end')
-            ->Andwhere('r.endTime NOT BETWEEN :start AND :end')
+            ->Andwhere(':start NOT BETWEEN r.startTime AND r.endTime')
+            ->Andwhere(':end NOT BETWEEN r.startTime AND r.endTime')
             ->setParameter('start', $startDate)
             ->setParameter('end', $endDate)
+            ->join('v.carRental', 'c')
+            ->Andwhere('c.city = :city')
+            ->setParameter('city', $location)
             ->getQuery()
             ->getArrayResult();
     }
