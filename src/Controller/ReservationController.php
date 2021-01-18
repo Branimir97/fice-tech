@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Reservation;
 use App\Entity\User;
+use App\Repository\CarRentalRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\VehicleRepository;
 use Exception;
@@ -41,10 +42,11 @@ class ReservationController extends AbstractController
      * @Route("/{id}", name="reservation_insert", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
+     * @param CarRentalRepository $carRentalRepository
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function insertAction(Request $request, VehicleRepository $vehicleRepository, CarRentalRepository $carRentalRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
@@ -64,6 +66,11 @@ class ReservationController extends AbstractController
             }
         }
         $reservation->setStatus("waiting");
+        $carRental = $carRentalRepository->findOneBy(['id'=>$response['carRental']]);
+        if($carRental === null) {
+            return new JsonResponse('car rental not found', 400);
+        }
+        $reservation->addCarRental($carRental);
         $reservation->setInfo($response['info']);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($reservation);
