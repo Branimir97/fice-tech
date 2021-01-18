@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ReservationRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
@@ -71,6 +73,16 @@ class Reservation
      * @Gedmo\Timestampable(on="update")
      */
     private $updatedAt;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=CarRental::class, inversedBy="reservations")
+     */
+    private $carRental;
+
+    public function __construct()
+    {
+        $this->carRental = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -193,6 +205,30 @@ class Reservation
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CarRental[]
+     */
+    public function getCarRental(): Collection
+    {
+        return $this->carRental;
+    }
+
+    public function addCarRental(CarRental $carRental): self
+    {
+        if (!$this->carRental->contains($carRental)) {
+            $this->carRental[] = $carRental;
+        }
+
+        return $this;
+    }
+
+    public function removeCarRental(CarRental $carRental): self
+    {
+        $this->carRental->removeElement($carRental);
 
         return $this;
     }

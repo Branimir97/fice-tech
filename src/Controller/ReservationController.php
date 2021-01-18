@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Reservation;
 use App\Entity\User;
+use App\Repository\CarRentalRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\VehicleRepository;
 use Exception;
@@ -41,10 +42,11 @@ class ReservationController extends AbstractController
      * @Route("/{id}", name="reservation_insert", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
+     * @param CarRentalRepository $carRentalRepository
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function insertAction(Request $request, VehicleRepository $vehicleRepository, CarRentalRepository $carRentalRepository): JsonResponse
     {
         $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
@@ -63,11 +65,12 @@ class ReservationController extends AbstractController
                 return new JsonResponse('payment amount must be defined if user pays with cash', 400);
             }
         }
-        $allowedStatus = ['accepted', 'rejected', 'waiting'];
-        if(!in_array($response['status'], $allowedStatus)) {
-            return new JsonResponse('not allowed status name', 400);
+        $reservation->setStatus("waiting");
+        $carRental = $carRentalRepository->findOneBy(['id'=>$response['carRental']]);
+        if($carRental === null) {
+            return new JsonResponse('car rental not found', 400);
         }
-        $reservation->setStatus($response['status']);
+        $reservation->addCarRental($carRental);
         $reservation->setInfo($response['info']);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($reservation);
@@ -94,6 +97,21 @@ class ReservationController extends AbstractController
         $entityManager->remove($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
+    }
+
+    /**
+     * @Route("/me", name="reservation_list_by_user", methods={"GET"})
+     * @param ReservationRepository $reservationRepository
+     * @return JsonResponse
+     */
+    public function getByUserAction(ReservationRepository $reservationRepository): JsonResponse
+    {
+        $this->denyAccessUnlessGranted("ROLE_USER");
+        $reservations = $reservationRepository->findByUserId($this->getUser());
+        if(count($reservations) == 0) {
+            return new JsonResponse('no reservations', 400);
+        }
+        return new JsonResponse($reservations, 200);
     }
 
     /**
@@ -131,20 +149,5 @@ class ReservationController extends AbstractController
         $entityManager->persist($reservation);
         $entityManager->flush();
         return new JsonResponse('success', 200);
-    }
-
-    /**
-     * @Route("/waiting", name="reservations_waiting", methods={"GET"})
-     * @param ReservationRepository $reservationRepository
-     * @return JsonResponse
-     */
-    public function getStatusWaitingReservations(ReservationRepository $reservationRepository): JsonResponse
-    {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
-        $reservations = $reservationRepository->findAllStatusWaiting();
-        if(count($reservations)== 0) {
-            return new JsonResponse('there are no reservations with waiting status', 400);
-        }
-        return new JsonResponse($reservations, 200);
     }
 }
