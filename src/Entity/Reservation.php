@@ -74,6 +74,16 @@ class Reservation
      */
     private $updatedAt;
 
+    /**
+     * @ORM\ManyToMany(targetEntity=CarRental::class, inversedBy="reservations")
+     */
+    private $carRental;
+
+    public function __construct()
+    {
+        $this->carRental = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -195,6 +205,30 @@ class Reservation
     public function setUpdatedAt(?\DateTimeInterface $updatedAt): self
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|CarRental[]
+     */
+    public function getCarRental(): Collection
+    {
+        return $this->carRental;
+    }
+
+    public function addCarRental(CarRental $carRental): self
+    {
+        if (!$this->carRental->contains($carRental)) {
+            $this->carRental[] = $carRental;
+        }
+
+        return $this;
+    }
+
+    public function removeCarRental(CarRental $carRental): self
+    {
+        $this->carRental->removeElement($carRental);
 
         return $this;
     }
