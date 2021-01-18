@@ -48,7 +48,7 @@ class VehicleRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('v')
             ->where('v.status != :status')
             ->setParameter('status', "Reserved")
-            ->andWhere('v.carRental =: car_rental_id')
+            ->andWhere('v.carRental = :car_rental_id')
             ->setParameter('car_rental_id', $id)
             ->getQuery()
             ->getArrayResult();

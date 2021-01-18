@@ -174,7 +174,7 @@ class VehicleController extends AbstractController
     }
 
     /**
-     * @Route("/filter/{id}", name="vehicle_filter", methods={"GET"})
+     * @Route("/filter/{id}", name="vehicle_filter_by_carrental", methods={"GET"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
