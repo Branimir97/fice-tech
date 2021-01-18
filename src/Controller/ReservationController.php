@@ -87,7 +87,7 @@ class ReservationController extends AbstractController
      */
     public function deleteAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(['id'=>$id]);
         if($reservation === null) {

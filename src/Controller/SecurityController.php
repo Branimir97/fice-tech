@@ -49,12 +49,6 @@ class SecurityController extends AbstractController
                 'exp' => time() + 3600 // 1 hour expiration
             ]);
 
-        $entityManager = $this->getDoctrine()->getManager();
-        $dbToken = new \App\Entity\Token();
-        $dbToken->setValue($this->token);
-        $entityManager->persist($dbToken);
-        $entityManager->flush();
-
         return new JsonResponse(['token'=> $this->token]);
     }
 
@@ -70,6 +64,7 @@ class SecurityController extends AbstractController
      * @Route("/auth", name="app_auth", methods={"POST"})
      * @param Request $request
      * @param JWTEncoderInterface $JWTEncoder
+     * @param UserRepository $userRepository
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
@@ -78,7 +73,6 @@ class SecurityController extends AbstractController
         $response = json_decode($request->getContent(), true);
         $jwtToken = $JWTEncoder->decode($response['token']);
         $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
-        return new JsonResponse($user);
-
+        return new JsonResponse($user, 200);
     }
 }
