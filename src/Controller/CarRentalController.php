@@ -71,7 +71,6 @@ class CarRentalController extends AbstractController
      */
     public function getByIdAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $carRentalCompany = $carRentalRepository->findOneById($id);
         if(empty($carRentalCompany)) {
