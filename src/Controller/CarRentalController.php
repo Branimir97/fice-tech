@@ -24,9 +24,9 @@ class CarRentalController extends AbstractController
      * @param UserRepository $userRepository
      * @return JsonResponse
      */
-    public function insertAction(Request $request, UserRepository $userRepository): JsonResponse
+    public function insertAction(Request $request): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $this->denyAccessUnlessGranted("ROLE_USER");
         $response = json_decode($request->getContent(), true);
         $carRental = new CarRental();
         $carRental->setName($response['name']);
