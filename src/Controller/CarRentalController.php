@@ -51,7 +51,7 @@ class CarRentalController extends AbstractController
      */
     public function deleteAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
         $carRentalCompany = $carRentalRepository->findOneBy(['id'=>$id]);
         if($carRentalCompany === null) {
