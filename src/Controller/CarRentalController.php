@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\CarRental;
+use App\Entity\User;
 use App\Repository\CarRentalRepository;
 use App\Repository\UserRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Validator\Constraints\Json;
 
 /**
  * Class CarRentalController
@@ -24,20 +26,26 @@ class CarRentalController extends AbstractController
      * @param UserRepository $userRepository
      * @return JsonResponse
      */
-    public function insertAction(Request $request): JsonResponse
+    public function insertAction(Request $request, UserRepository $userRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_USER");
         $response = json_decode($request->getContent(), true);
+
+
+        $user = $userRepository->findOneBy(['id'=>$response['user']]);
+        $user->setRoles(array("ROLE_USER", "ROLE_ADMIN"));
+        $entityManager = $this->getDoctrine()->getManager();
+        $entityManager->persist($user);
+        $entityManager->flush();
+
         $carRental = new CarRental();
         $carRental->setName($response['name']);
-        $user = $this->getUser();
         $carRental->setOwner($user);
         $carRental->setCity($response['city']);
         $carRental->setAddress($response['address']);
         $carRental->setContactNumber($response['contactNumber']);
         $carRental->setEmail($response['email']);
         $carRental->setImage($response['image']);
-        $entityManager = $this->getDoctrine()->getManager();
+
         $entityManager->persist($carRental);
         $entityManager->flush();
         return new JsonResponse('success', 200);
@@ -51,7 +59,6 @@ class CarRentalController extends AbstractController
      */
     public function deleteAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $carRentalCompany = $carRentalRepository->findOneBy(['id'=>$id]);
         if($carRentalCompany === null) {
