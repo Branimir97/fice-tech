@@ -24,9 +24,9 @@ class CarRentalController extends AbstractController
      * @param UserRepository $userRepository
      * @return JsonResponse
      */
-    public function insertAction(Request $request, UserRepository $userRepository): JsonResponse
+    public function insertAction(Request $request): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
+        $this->denyAccessUnlessGranted("ROLE_USER");
         $response = json_decode($request->getContent(), true);
         $carRental = new CarRental();
         $carRental->setName($response['name']);
@@ -51,7 +51,7 @@ class CarRentalController extends AbstractController
      */
     public function deleteAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_USER");
+        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $carRentalCompany = $carRentalRepository->findOneBy(['id'=>$id]);
         if($carRentalCompany === null) {
