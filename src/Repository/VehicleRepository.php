@@ -45,8 +45,8 @@ class VehicleRepository extends ServiceEntityRepository
             ->join('v.carRental', 'c')
             ->Andwhere('c.city = :city')
             ->setParameter('city', $location)
-            ->join('v.carRental', 'r')
-            ->addSelect('r')
+            ->join('v.carRental', 'cr')
+            ->addSelect('cr')
             ->getQuery()
             ->getArrayResult();
     }
@@ -57,8 +57,8 @@ class VehicleRepository extends ServiceEntityRepository
             ->setParameter('status', "Reserved")
             ->andWhere('v.carRental = :car_rental_id')
             ->setParameter('car_rental_id', $id)
-            ->join('v.carRental', 'r')
-            ->addSelect('r')
+            ->join('v.carRental', 'cr')
+            ->addSelect('cr')
             ->getQuery()
             ->getArrayResult();
     }
