@@ -23,6 +23,8 @@ class CarRentalRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('c')
             ->where('c.id =:parameter')
             ->setParameter('parameter', $id)
+            ->join('c.owner', 'o')
+            ->addSelect('o')
             ->getQuery()
             ->getArrayResult();
     }
