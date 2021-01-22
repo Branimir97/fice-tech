@@ -31,21 +31,33 @@ class VehicleRepository extends ServiceEntityRepository
             ->getArrayResult();
     }
 
-    public function filterAvailableVehiclesByLocationAndDates($location, $start, $end) {
-        $startDate = new \DateTime($start);
-        $endDate = new \DateTime($end);
+    public function filterAvailableByStatusAndLocation($location) {
         return $this->createQueryBuilder('v')
-            ->where('v.status != :status')
-            ->setParameter('status', "Reserved")
-            ->join('v.reservations', 'r')
-            ->Andwhere(':start NOT BETWEEN r.startTime AND r.endTime')
-            ->Andwhere(':end NOT BETWEEN r.startTime AND r.endTime')
-            ->setParameter('start', $startDate)
-            ->setParameter('end', $endDate)
-            ->join('v.carRental', 'c')
-            ->Andwhere('c.city = :city')
-            ->setParameter('city', $location)
+            ->where('v.status = :status')
+            ->setParameter('status', 'Available')
             ->join('v.carRental', 'cr')
+            ->andWhere('cr.city = :city')
+            ->setParameter('city', $location)
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    public function filterReservedByDatesAndLocation($location, $startTime, $endTime) {
+        $startDate = new \DateTime($startTime);
+        $endDate = new \DateTime($endTime);
+        return $this->createQueryBuilder('v')
+            ->where('v.status = :status')
+            ->setParameter('status', 'Reserved')
+            ->join('v.carRental', 'cr')
+            ->andWhere('cr.city = :location')
+            ->setParameter('location', $location)
+            ->join('v.reservations', 'r')
+            ->andWhere(':startDate NOT BETWEEN r.startTime AND r.endTime')
+            ->andWhere(':endDate NOT BETWEEN r.startTime AND r.endTime')
+            ->setParameter('startDate', $startDate)
+            ->setParameter('endDate', $endDate)
+            ->andWhere('r.status = :reservation_status')
+            ->setParameter('reservation_status', 'accepted')
             ->addSelect('cr')
             ->join('v.images', 'i')
             ->addSelect('i')

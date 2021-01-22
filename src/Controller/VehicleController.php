@@ -165,8 +165,10 @@ class VehicleController extends AbstractController
     public function filterByLocationAndDatesAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
         $response = json_decode($request->getContent(), true);
-        $vehicles = $vehicleRepository->filterAvailableVehiclesByLocationAndDates(
-            $response['location'], $response['startTime'], $response['endTime']);
+        //$vehicles = $vehicleRepository->filterAvailableByStatusAndLocation($response['location']);
+        $vehicles = $vehicleRepository->filterReservedByDatesAndLocation(
+          $response['location'], $response['startTime'], $response['endTime']
+        );
         if(count($vehicles) == 0) {
             return new JsonResponse('no vehicles', 400);
         }
