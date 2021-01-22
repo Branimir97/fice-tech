@@ -38,6 +38,9 @@ class VehicleRepository extends ServiceEntityRepository
             ->join('v.carRental', 'cr')
             ->andWhere('cr.city = :city')
             ->setParameter('city', $location)
+            ->addSelect('cr')
+            ->join('v.images', 'i')
+            ->addSelect('i')
             ->getQuery()
             ->getArrayResult();
     }
