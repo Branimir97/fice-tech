@@ -25,6 +25,8 @@ class ReservationRepository extends ServiceEntityRepository
             ->join('r.vehicle', 'v')
             ->addSelect('u')
             ->addSelect('v')
+            ->join('v.carRental', 'cr')
+            ->addSelect('cr')
             ->getQuery()
             ->getArrayResult();
     }
