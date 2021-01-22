@@ -47,6 +47,8 @@ class VehicleRepository extends ServiceEntityRepository
             ->setParameter('city', $location)
             ->join('v.carRental', 'cr')
             ->addSelect('cr')
+            ->join('v.images', 'i')
+            ->addSelect('i')
             ->getQuery()
             ->getArrayResult();
     }
@@ -59,6 +61,8 @@ class VehicleRepository extends ServiceEntityRepository
             ->setParameter('car_rental_id', $id)
             ->join('v.carRental', 'cr')
             ->addSelect('cr')
+            ->join('v.images', 'i')
+            ->addSelect('i')
             ->getQuery()
             ->getArrayResult();
     }
