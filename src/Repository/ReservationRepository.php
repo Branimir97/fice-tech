@@ -27,6 +27,8 @@ class ReservationRepository extends ServiceEntityRepository
             ->addSelect('v')
             ->join('v.carRental', 'cr')
             ->addSelect('cr')
+            ->join('cr.owner', 'o')
+            ->addSelect('o')
             ->getQuery()
             ->getArrayResult();
     }
@@ -41,6 +43,8 @@ class ReservationRepository extends ServiceEntityRepository
             ->addSelect('u')
             ->join('v.carRental', 'cr')
             ->addSelect('cr')
+            ->join('cr.owner', 'o')
+            ->addSelect('o')
             ->getQuery()
             ->getArrayResult();
     }
