@@ -6,6 +6,7 @@ use App\Entity\Image;
 use App\Entity\Vehicle;
 use App\Repository\CarRentalRepository;
 use App\Repository\ImageRepository;
+use App\Repository\UserRepository;
 use App\Repository\VehicleRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -42,12 +43,12 @@ class VehicleController extends AbstractController
      * @Route("/", name="vehicle_insert", methods={"POST"})
      * @param Request $request
      * @param CarRentalRepository $carRentalRepository
+     * @param UserRepository $userRepository
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
+    public function insertAction(Request $request, CarRentalRepository $carRentalRepository, UserRepository $userRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $response = json_decode($request->getContent(), true);
         $vehicle = new Vehicle();
         $vehicle->setMark($response['mark']);
@@ -66,7 +67,7 @@ class VehicleController extends AbstractController
         if(isset($response['discount'])) {
             $vehicle->setDiscount($response['discount']);
         }
-        $user = $this->getUser();
+        $user = $userRepository->findOneBy(['id'=>$response['user_id']]);
         $carRental = $carRentalRepository->findOneBy(['owner'=>$user]);
         $vehicle->setCarRental($carRental);
         $entityManager = $this->getDoctrine()->getManager();
@@ -88,12 +89,12 @@ class VehicleController extends AbstractController
      * @Route("/{id}", name="vehicle_update", methods={"PUT"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
+     * @param ImageRepository $imageRepository
      * @return JsonResponse
      * @throws Exception
      */
     public function updateAction(Request $request, VehicleRepository $vehicleRepository, ImageRepository $imageRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $response = json_decode($request->getContent(), true);
 
@@ -144,7 +145,6 @@ class VehicleController extends AbstractController
      */
     public function deleteAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $vehicle = $vehicleRepository->findOneBy(['id'=>$id]);
         if($vehicle === null) {
@@ -164,7 +164,6 @@ class VehicleController extends AbstractController
      */
     public function filterByLocationAndDatesAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_USER");
         $response = json_decode($request->getContent(), true);
         $vehicles = $vehicleRepository->filterAvailableVehiclesByLocationAndDates(
             $response['location'], $response['startTime'], $response['endTime']);
@@ -182,7 +181,6 @@ class VehicleController extends AbstractController
      */
     public function filterByCarRentalAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
         $vehicles = $vehicleRepository->filterAvailableVehiclesByCarRental($id);
         if(count($vehicles) == 0) {
