@@ -35,6 +35,10 @@ class ReservationRepository extends ServiceEntityRepository
             ->where('r.user = :user_id')
             ->setParameter('user_id', $id)
             ->addSelect('v')
+            ->join('r.user', 'u')
+            ->addSelect('u')
+            ->join('v.carRental', 'cr')
+            ->addSelect('cr')
             ->getQuery()
             ->getArrayResult();
     }
