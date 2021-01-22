@@ -6,6 +6,7 @@ use App\Entity\Reservation;
 use App\Entity\User;
 use App\Repository\CarRentalRepository;
 use App\Repository\ReservationRepository;
+use App\Repository\UserRepository;
 use App\Repository\VehicleRepository;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -30,7 +31,6 @@ class ReservationController extends AbstractController
      */
     public function index(ReservationRepository $reservationRepository): Response
     {
-       $this->denyAccessUnlessGranted("ROLE_ADMIN");
        $reservations = $reservationRepository->findAllAsArray();
        if(count($reservations) == 0) {
            return new JsonResponse('no reservations', 400);
@@ -43,17 +43,18 @@ class ReservationController extends AbstractController
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @param CarRentalRepository $carRentalRepository
+     * @param UserRepository $userRepository
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertAction(Request $request, VehicleRepository $vehicleRepository, CarRentalRepository $carRentalRepository): JsonResponse
+    public function insertAction(Request $request, VehicleRepository $vehicleRepository, CarRentalRepository $carRentalRepository, UserRepository $userRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
         $response = json_decode($request->getContent(), true);
         $vehicle = $vehicleRepository->findOneBy(["id"=>$id]);
         $reservation = new Reservation();
-        $reservation->setUser($this->getUser());
+        $user = $userRepository->findOneBy(['id'=>$response['user_id']]);
+        $reservation->setUser($user);
         $reservation->setVehicle($vehicle);
         $reservation->setStartTime(new \DateTime($response['startTime']));
         $reservation->setEndTime((new \DateTime($response['endTime'])));
@@ -87,7 +88,6 @@ class ReservationController extends AbstractController
      */
     public function deleteAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_USER");
         $id = $request->get('id');
         $reservation = $reservationRepository->findOneBy(['id'=>$id]);
         if($reservation === null) {
@@ -100,18 +100,15 @@ class ReservationController extends AbstractController
     }
 
     /**
-     * @Route("/me", name="reservation_list_by_user", methods={"GET"})
+     * @Route("/me", name="reservation_list_by_user", methods={"POST"})
+     * @param Request $request
      * @param ReservationRepository $reservationRepository
      * @return JsonResponse
      */
-    public function getByUserAction(ReservationRepository $reservationRepository): JsonResponse
+    public function getByUserAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_USER");
-        $reservations = $reservationRepository->findByUserId($this->getUser());
-        if(count($reservations) == 0) {
-            return new JsonResponse('no reservations', 400);
-        }
-        return new JsonResponse($reservations, 200);
+        $response = json_decode($request->getContent(), true);
+        return new JsonResponse($response);
     }
 
     /**
@@ -122,7 +119,6 @@ class ReservationController extends AbstractController
      */
     public function changeReservationStatus(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
-        $this->denyAccessUnlessGranted("ROLE_ADMIN");
         $id = $request->get('id');
         $response = json_decode($request->getContent(), true);
         $reservation = $reservationRepository->findOneBy(["id"=>$id]);

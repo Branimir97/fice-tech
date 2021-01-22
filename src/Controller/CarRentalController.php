@@ -29,8 +29,6 @@ class CarRentalController extends AbstractController
     public function insertAction(Request $request, UserRepository $userRepository): JsonResponse
     {
         $response = json_decode($request->getContent(), true);
-
-
         $user = $userRepository->findOneBy(['id'=>$response['user']]);
         $user->setRoles(array("ROLE_USER", "ROLE_ADMIN"));
         $entityManager = $this->getDoctrine()->getManager();
