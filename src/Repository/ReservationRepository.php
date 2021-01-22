@@ -32,7 +32,7 @@ class ReservationRepository extends ServiceEntityRepository
     public function findByUserId($id) {
         return $this->createQueryBuilder('r')
             ->join('r.vehicle', 'v')
-            ->where('r.user =:user_id')
+            ->where('r.user = :user_id')
             ->setParameter('user_id', $id)
             ->addSelect('v')
             ->getQuery()

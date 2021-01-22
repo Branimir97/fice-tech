@@ -100,7 +100,7 @@ class ReservationController extends AbstractController
     }
 
     /**
-     * @Route("/me", name="reservation_list_by_user", methods={"POST"})
+     * @Route("/me", name="reservation_list_by_user", methods={"PATCH"})
      * @param Request $request
      * @param ReservationRepository $reservationRepository
      * @return JsonResponse
@@ -108,7 +108,12 @@ class ReservationController extends AbstractController
     public function getByUserAction(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
         $response = json_decode($request->getContent(), true);
-        return new JsonResponse($response);
+        $reservations = $reservationRepository->findByUserId($response['user_id']);
+
+        if(count($reservations) == 0) {
+            return new JsonResponse('no reservations', 400);
+        }
+        return new JsonResponse($reservations, 200);
     }
 
     /**
