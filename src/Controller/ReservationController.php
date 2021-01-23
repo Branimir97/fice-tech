@@ -120,7 +120,7 @@ class ReservationController extends AbstractController
      * @param Request $request
      * @param ReservationRepository $reservationRepository
      * @return JsonResponse
-     * @Route("/update/{id}", name="reservation_update", methods={"PATCH"})
+     * @Route("/update/{id}", name="reservation_update", methods={"PUT"})
      */
     public function changeReservationStatus(Request $request, ReservationRepository $reservationRepository): JsonResponse
     {
