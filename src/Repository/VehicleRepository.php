@@ -61,7 +61,6 @@ class VehicleRepository extends ServiceEntityRepository
             ->setParameter('endDate', $endDate)
             ->andWhere('r.status = :reservation_status')
             ->setParameter('reservation_status', 'Accepted')
-            ->distinct(true)
             ->addSelect('cr')
             ->join('v.images', 'i')
             ->addSelect('i')
