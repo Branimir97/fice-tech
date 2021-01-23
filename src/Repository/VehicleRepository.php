@@ -55,6 +55,8 @@ class VehicleRepository extends ServiceEntityRepository
             ->join('v.reservations', 'r')
             ->andWhere(':startDate NOT BETWEEN r.startTime AND r.endTime')
             ->andWhere(':endDate NOT BETWEEN r.startTime AND r.endTime')
+            ->andWhere('r.startTime NOT BETWEEN :startTime AND :endTime')
+            ->andWhere('r.endTime NOT BETWEEN :startTime AND :endTime')
             ->setParameter('startDate', $startDate)
             ->setParameter('endDate', $endDate)
             ->andWhere('r.status = :reservation_status')
