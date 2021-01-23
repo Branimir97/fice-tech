@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\Reservation;
-use App\Entity\User;
 use App\Repository\CarRentalRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\UserRepository;
@@ -66,7 +65,7 @@ class ReservationController extends AbstractController
                 return new JsonResponse('payment amount must be defined if user pays with cash', 400);
             }
         }
-        $reservation->setStatus("waiting");
+        $reservation->setStatus("Waiting");
         $carRental = $carRentalRepository->findOneBy(['id'=>$response['carRental']]);
         if($carRental === null) {
             return new JsonResponse('car rental not found', 400);
@@ -130,7 +129,7 @@ class ReservationController extends AbstractController
         if($reservation === null) {
             return new JsonResponse('reservation does not exist', 200);
         }
-        $allowedStatus = ['accepted', 'rejected', 'waiting'];
+        $allowedStatus = ['Accepted', 'Rejected', 'Waiting'];
         if(!in_array($response['status'], $allowedStatus)) {
            return new JsonResponse('not allowed status name', 400);
         } else {
@@ -140,9 +139,9 @@ class ReservationController extends AbstractController
         }
         $vehicle = $reservation->getVehicle();
         $reservation->setStatus($response['status']);
-        if($reservation->getStatus()==="accepted") {
+        if($reservation->getStatus()==="Accepted") {
             $vehicle->setStatus("Reserved");
-        } else if($reservation->getStatus() == "rejected" || $reservation->getStatus() == "waiting") {
+        } else if($reservation->getStatus() == "Rejected" || $reservation->getStatus() == "Waiting") {
             $vehicle->setStatus("Available");
         }
         $entityManager = $this->getDoctrine()->getManager();
