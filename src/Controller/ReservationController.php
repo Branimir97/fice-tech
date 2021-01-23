@@ -144,6 +144,7 @@ class ReservationController extends AbstractController
         } else if($reservation->getStatus() == "Rejected" || $reservation->getStatus() == "Waiting") {
             $vehicle->setStatus("Available");
         }
+        $reservation->setInfo($response['info']);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($vehicle);
         $entityManager->persist($reservation);
