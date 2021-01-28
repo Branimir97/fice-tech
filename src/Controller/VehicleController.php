@@ -41,6 +41,7 @@ class VehicleController extends AbstractController
 
     /**
      * @Route("/", name="vehicle_insert", methods={"POST"})
+     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param CarRentalRepository $carRentalRepository
      * @param UserRepository $userRepository
