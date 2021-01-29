@@ -107,7 +107,6 @@ class CarRentalController extends AbstractController
      * @Route("/{id}", name="carrental_get", methods={"POST"})
      * @param Request $request
      * @param CarRentalRepository $carRentalRepository
-     * @param JWTEncoderInterface $JWTEncoder
      * @return JsonResponse
      */
     public function getCarRentalByIdAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
