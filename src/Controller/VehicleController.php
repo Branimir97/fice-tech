@@ -9,13 +9,13 @@ use App\Repository\ImageRepository;
 use App\Repository\UserRepository;
 use App\Repository\VehicleRepository;
 use Exception;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Validator\Constraints\Json;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 
 /**
@@ -30,52 +30,58 @@ class VehicleController extends AbstractController
      * @param VehicleRepository $vehicleRepository
      * @return Response
      */
-    public function index(VehicleRepository $vehicleRepository): Response
+    public function getAllVehiclesAction(VehicleRepository $vehicleRepository): Response
     {
         $vehicles = $vehicleRepository->findAllAsArray();
         if(count($vehicles) == 0) {
-            return new JsonResponse('no vehicles', 400);
+            return new JsonResponse('No vehicles.', 400);
         }
         return new JsonResponse($vehicles, 200);
     }
 
     /**
      * @Route("/", name="vehicle_insert", methods={"POST"})
-     * @IsGranted("ROLE_ADMIN")
      * @param Request $request
      * @param CarRentalRepository $carRentalRepository
      * @param UserRepository $userRepository
+     * @param JWTEncoderInterface $JWTEncoder
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertAction(Request $request, CarRentalRepository $carRentalRepository, UserRepository $userRepository): JsonResponse
+    public function insertVehicleAction(Request $request, CarRentalRepository $carRentalRepository,
+                                 UserRepository $userRepository, JWTEncoderInterface $JWTEncoder): JsonResponse
     {
-        $response = json_decode($request->getContent(), true);
-        $vehicle = new Vehicle();
-        $vehicle->setMark($response['mark']);
-        $vehicle->setModel($response['model']);
-        $vehicle->setModelYear(new \DateTime($response['modelYear']));
-        $vehicle->setManufactureYear(new \DateTime($response['manufactureYear']));
-        $vehicle->setGears($response['gears']);
-        $vehicle->setColor($response['color']);
-        $vehicle->setGearbox($response['gearbox']);
-        $vehicle->setStatus($response['status']);
-        $vehicle->setPower($response['power']);
-        $vehicle->setType($response['type']);
-        $vehicle->setPrice($response['price']);
-        $vehicle->setFuelType($response['fuelType']);
-        $vehicle->setGateNumber($response['gateNumber']);
-        if(isset($response['discount'])) {
-            $vehicle->setDiscount($response['discount']);
+        $request = json_decode($request->getContent(), true);
+        $jwtToken = $JWTEncoder->decode($request['token']);
+        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
+
+        if(!in_array("ROLE_ADMIN", $user->getRoles())) {
+            return new JsonResponse('You are not owner of car rental company.', 400);
         }
-        $user = $userRepository->findOneBy(['id'=>$response['user_id']]);
+        $vehicle = new Vehicle();
+        $vehicle->setMark($request['mark']);
+        $vehicle->setModel($request['model']);
+        $vehicle->setModelYear(new \DateTime($request['modelYear']));
+        $vehicle->setManufactureYear(new \DateTime($request['manufactureYear']));
+        $vehicle->setGears($request['gears']);
+        $vehicle->setColor($request['color']);
+        $vehicle->setGearbox($request['gearbox']);
+        $vehicle->setStatus($request['status']);
+        $vehicle->setPower($request['power']);
+        $vehicle->setType($request['type']);
+        $vehicle->setPrice($request['price']);
+        $vehicle->setFuelType($request['fuelType']);
+        $vehicle->setGateNumber($request['gateNumber']);
+        if(isset($request['discount'])) {
+            $vehicle->setDiscount($request['discount']);
+        }
         $carRental = $carRentalRepository->findOneBy(['owner'=>$user]);
         $vehicle->setCarRental($carRental);
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($vehicle);
         $entityManager->flush();
 
-        foreach($response['images'] as $imageResponse) {
+        foreach($request['images'] as $imageResponse) {
             $image = new Image();
             $image->setIsCover($imageResponse['isCover']);
             $image->setBase64($imageResponse['base64']);
@@ -83,7 +89,7 @@ class VehicleController extends AbstractController
             $entityManager->persist($image);
             $entityManager->flush();
         }
-        return new JsonResponse('success', 200);
+        return new JsonResponse('Success.', 200);
     }
 
     /**
@@ -91,30 +97,41 @@ class VehicleController extends AbstractController
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @param ImageRepository $imageRepository
+     * @param JWTEncoderInterface $JWTEncoder
+     * @param UserRepository $userRepository
      * @return JsonResponse
-     * @throws Exception
+     * @throws JWTDecodeFailureException
      */
-    public function updateAction(Request $request, VehicleRepository $vehicleRepository, ImageRepository $imageRepository): JsonResponse
+    public function updateVehicleAction(Request $request, VehicleRepository $vehicleRepository,
+                                        ImageRepository $imageRepository, JWTEncoderInterface $JWTEncoder,
+                                        UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
-        $response = json_decode($request->getContent(), true);
+        $request = json_decode($request->getContent(), 1);
+        $jwtToken = $JWTEncoder->decode($request['token']);
+        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
 
         $vehicle = $vehicleRepository->findOneBy(['id'=>$id]);
-        $vehicle->setMark($response['mark']);
-        $vehicle->setModel($response['model']);
-        $vehicle->setModelYear(new \DateTime($response['modelYear']));
-        $vehicle->setManufactureYear(new \DateTime($response['manufactureYear']));
-        $vehicle->setGears($response['gears']);
-        $vehicle->setColor($response['color']);
-        $vehicle->setGearbox($response['gearbox']);
-        $vehicle->setStatus($response['status']);
-        $vehicle->setPower($response['power']);
-        $vehicle->setType($response['type']);
-        $vehicle->setPrice($response['price']);
-        $vehicle->setFuelType($response['fuelType']);
-        $vehicle->setGateNumber($response['gateNumber']);
-        if(isset($response['discount'])) {
-            $vehicle->setDiscount($response['discount']);
+        $carRental = $vehicle->getCarRental();
+        $owner = $carRental->getOwner();
+        if($user->getId() !== $owner->getId()) {
+            return new JsonResponse("You are not owner of this car rental company.", 400);
+        }
+        $vehicle->setMark($request['mark']);
+        $vehicle->setModel($request['model']);
+        $vehicle->setModelYear(new \DateTime($request['modelYear']));
+        $vehicle->setManufactureYear(new \DateTime($request['manufactureYear']));
+        $vehicle->setGears($request['gears']);
+        $vehicle->setColor($request['color']);
+        $vehicle->setGearbox($request['gearbox']);
+        $vehicle->setStatus($request['status']);
+        $vehicle->setPower($request['power']);
+        $vehicle->setType($request['type']);
+        $vehicle->setPrice($request['price']);
+        $vehicle->setFuelType($request['fuelType']);
+        $vehicle->setGateNumber($request['gateNumber']);
+        if(isset($request['discount'])) {
+            $vehicle->setDiscount($request['discount']);
         }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($vehicle);
@@ -135,44 +152,57 @@ class VehicleController extends AbstractController
                 $entityManager->flush();
             }
         }
-        return new JsonResponse('success', 201);
+        return new JsonResponse('Success.', 200);
     }
 
     /**
      * @Route("/{id}", name="vehicle_delete", methods={"DELETE"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
+     * @param JWTEncoderInterface $JWTEncoder
+     * @param UserRepository $userRepository
      * @return JsonResponse
+     * @throws JWTDecodeFailureException
      */
-    public function deleteAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function deleteVehicleAction(Request $request, VehicleRepository $vehicleRepository,
+                                        JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
+        $request = json_decode($request->getContent(), 1);
+        $jwtToken = $JWTEncoder->decode($request['token']);
+        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
+
         $vehicle = $vehicleRepository->findOneBy(['id'=>$id]);
         if($vehicle === null) {
-            return new JsonResponse('vehicle does not exist', 400);
+            return new JsonResponse('Vehicle with id '.$id.' does not exist.', 400);
+        }
+        $carRental = $vehicle->getCarRental();
+        $owner = $carRental->getOwner();
+        if($user->getId() !== $owner->getId()) {
+            return new JsonResponse("You are not owner of this car rental company.", 400);
         }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($vehicle);
         $entityManager->flush();
-        return new JsonResponse('success', 200);
+        return new JsonResponse('Success.', 200);
     }
 
     /**
-     * @Route("/filter", name="vehicle_filter", methods={"POST"})
+     * @Route("/filter", name="vehicle_filter_by_location_and_dates", methods={"POST"})
      * @param Request $request
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
      */
     public function filterByLocationAndDatesAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
     {
-        $response = json_decode($request->getContent(), true);
-        $vehicles1 = $vehicleRepository->filterAvailableByStatusAndLocation($response['location']);
+        $request = json_decode($request->getContent(), true);
+        $vehicles1 = $vehicleRepository->filterAvailableByStatusAndLocation($request['location']);
         $vehicles2 = $vehicleRepository->filterReservedByDatesAndLocation(
-          $response['location'], $response['startTime'], $response['endTime']
+            $request['location'], $request['startTime'], $request['endTime']
         );
         $vehicles = array_merge($vehicles1, $vehicles2);
         if(count($vehicles) == 0) {
-            return new JsonResponse('no vehicles', 400);
+            return new JsonResponse('No vehicles.', 400);
         }
         return new JsonResponse($vehicles, 200);
     }
@@ -188,8 +218,24 @@ class VehicleController extends AbstractController
         $id = $request->get('id');
         $vehicles = $vehicleRepository->filterAvailableVehiclesByCarRental($id);
         if(count($vehicles) == 0) {
-            return new JsonResponse('no vehicles', 400);
+            return new JsonResponse('No vehicles found in car rental company with id '.$id.'.', 400);
         }
         return new JsonResponse($vehicles, 200);
+    }
+
+    /**
+     * @Route("/get/{id}", name="vehicle_filter_by_id", methods={"GET"})
+     * @param Request $request
+     * @param VehicleRepository $vehicleRepository
+     * @return JsonResponse
+     */
+    public function getVehicleByIdAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    {
+        $id = $request->get('id');
+        $vehicle = $vehicleRepository->findOneAsArray($id);
+        if(count($vehicle) == 0) {
+            return new JsonResponse('Vehicle with id '.$id.' does not exist.', 400);
+        }
+        return new JsonResponse($vehicle, 200);
     }
 }

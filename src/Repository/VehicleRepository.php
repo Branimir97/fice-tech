@@ -22,9 +22,9 @@ class VehicleRepository extends ServiceEntityRepository
     public function findAllAsArray() {
         return $this->createQueryBuilder('v')
             ->join('v.images', 'i')
-            ->addSelect('i')
-            ->join('v.carRental', 'r')
-            ->addSelect('r')
+            ->join('v.carRental', 'cr')
+            ->join('cr.owner', 'o')
+            ->addSelect('i', 'cr', 'o')
             ->getQuery()
             ->getArrayResult();
     }
@@ -36,9 +36,9 @@ class VehicleRepository extends ServiceEntityRepository
             ->join('v.carRental', 'cr')
             ->andWhere('cr.city = :city')
             ->setParameter('city', $location)
-            ->addSelect('cr')
             ->join('v.images', 'i')
-            ->addSelect('i')
+            ->join('cr.owner', 'o')
+            ->addSelect('cr', 'i', 'o')
             ->getQuery()
             ->getArrayResult();
     }
@@ -61,9 +61,9 @@ class VehicleRepository extends ServiceEntityRepository
             ->setParameter('endDate', $endDate)
             ->andWhere('r.status = :reservation_status')
             ->setParameter('reservation_status', 'Accepted')
-            ->addSelect('cr')
             ->join('v.images', 'i')
-            ->addSelect('i')
+            ->join('cr.owner', 'o')
+            ->addSelect('cr', 'i', 'o')
             ->getQuery()
             ->getArrayResult();
     }
@@ -75,9 +75,21 @@ class VehicleRepository extends ServiceEntityRepository
             ->andWhere('v.carRental = :car_rental_id')
             ->setParameter('car_rental_id', $id)
             ->join('v.carRental', 'cr')
-            ->addSelect('cr')
+            ->join('cr.owner', 'o')
             ->join('v.images', 'i')
-            ->addSelect('i')
+            ->addSelect('cr', 'i', 'o')
+            ->getQuery()
+            ->getArrayResult();
+    }
+
+    public function findOneAsArray($id) {
+        return $this->createQueryBuilder('v')
+            ->where('v.id = :id')
+            ->setParameter('id', $id)
+            ->join('v.carRental', 'cr')
+            ->join('cr.owner', 'o')
+            ->join('v.images', 'i')
+            ->addSelect('cr', 'i', 'o')
             ->getQuery()
             ->getArrayResult();
     }
