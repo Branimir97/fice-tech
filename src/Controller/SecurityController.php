@@ -72,7 +72,8 @@ class SecurityController extends AbstractController
     {
         $response = json_decode($request->getContent(), true);
         $jwtToken = $JWTEncoder->decode($response['token']);
-        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
+
+        $user = $userRepository->getUserData($jwtToken['username']);
         return new JsonResponse($user, 200);
     }
 }
