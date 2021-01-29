@@ -6,6 +6,8 @@ use App\Entity\CarRental;
 use App\Entity\User;
 use App\Repository\CarRentalRepository;
 use App\Repository\UserRepository;
+use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
+use Lexik\Bundle\JWTAuthenticationBundle\Exception\JWTDecodeFailureException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -24,12 +26,19 @@ class CarRentalController extends AbstractController
      * @Route("/", name="carrental_insert", methods={"POST"})
      * @param Request $request
      * @param UserRepository $userRepository
+     * @param JWTEncoderInterface $JWTEncoder
      * @return JsonResponse
+     * @throws JWTDecodeFailureException
      */
-    public function insertAction(Request $request, UserRepository $userRepository): JsonResponse
+    public function insertAction(Request $request, UserRepository $userRepository, JWTEncoderInterface $JWTEncoder): JsonResponse
     {
         $response = json_decode($request->getContent(), true);
-        $user = $userRepository->findOneBy(['id'=>$response['user']]);
+
+        $jwtToken = $JWTEncoder->decode($response['token']);
+        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
+        if(in_array("ROLE_ADMIN", $user->getRoles())) {
+            return new JsonResponse('You already registered rent-a-car house', 400);
+        }
         $user->setRoles(array("ROLE_USER", "ROLE_ADMIN"));
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($user);
