@@ -120,7 +120,7 @@ class ReservationController extends AbstractController
         $carRental = $vehicle->getCarRental();
         $owner = $carRental->getOwner();
         if($user->getId() !== $owner->getId()) {
-            return new JsonResponse("You are not owner of this car-rental house.");
+            return new JsonResponse("You are not owner of this car rental company.");
         }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($reservation);
@@ -171,7 +171,7 @@ class ReservationController extends AbstractController
         $carRental = $vehicle->getCarRental();
         $owner = $carRental->getOwner();
         if($user->getId() !== $owner->getId()) {
-            return new JsonResponse("You are not owner of this car-rental house.");
+            return new JsonResponse("You are not owner of this car rental company.");
         }
         if($reservation === null) {
             return new JsonResponse('reservation does not exist', 200);

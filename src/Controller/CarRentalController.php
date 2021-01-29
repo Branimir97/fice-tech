@@ -3,7 +3,6 @@
 namespace App\Controller;
 
 use App\Entity\CarRental;
-use App\Entity\User;
 use App\Repository\CarRentalRepository;
 use App\Repository\UserRepository;
 use Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface;
@@ -30,14 +29,14 @@ class CarRentalController extends AbstractController
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
-    public function insertAction(Request $request, UserRepository $userRepository, JWTEncoderInterface $JWTEncoder): JsonResponse
+    public function insertCarRentalAction(Request $request, UserRepository $userRepository,
+                                          JWTEncoderInterface $JWTEncoder): JsonResponse
     {
-        $response = json_decode($request->getContent(), true);
-
-        $jwtToken = $JWTEncoder->decode($response['token']);
+        $request = json_decode($request->getContent(), true);
+        $jwtToken = $JWTEncoder->decode($request['token']);
         $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
         if(in_array("ROLE_ADMIN", $user->getRoles())) {
-            return new JsonResponse('You already registered rent-a-car house', 400);
+            return new JsonResponse('You already registered car rental company.', 400);
         }
         $user->setRoles(array("ROLE_USER", "ROLE_ADMIN"));
         $entityManager = $this->getDoctrine()->getManager();
@@ -45,50 +44,82 @@ class CarRentalController extends AbstractController
         $entityManager->flush();
 
         $carRental = new CarRental();
-        $carRental->setName($response['name']);
+        $carRental->setName($request['name']);
         $carRental->setOwner($user);
-        $carRental->setCity($response['city']);
-        $carRental->setAddress($response['address']);
-        $carRental->setContactNumber($response['contactNumber']);
-        $carRental->setEmail($response['email']);
-        $carRental->setImage($response['image']);
+        $carRental->setCity($request['city']);
+        $carRental->setAddress($request['address']);
+        $carRental->setContactNumber($request['contactNumber']);
+        $carRental->setEmail($request['email']);
+        $carRental->setImage($request['image']);
 
         $entityManager->persist($carRental);
         $entityManager->flush();
-        return new JsonResponse('success', 200);
+        return new JsonResponse('Success.', 200);
     }
 
     /**
      * @Route("/{id}", name="carrental_delete", methods={"DELETE"})
      * @param Request $request
      * @param CarRentalRepository $carRentalRepository
+     * @param JWTEncoderInterface $JWTEncoder
+     * @param UserRepository $userRepository
      * @return JsonResponse
+     * @throws JWTDecodeFailureException
      */
-    public function deleteAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
+    public function deleteCarRentalAction(Request $request, CarRentalRepository $carRentalRepository,
+                                          JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
-        $carRentalCompany = $carRentalRepository->findOneBy(['id'=>$id]);
-        if($carRentalCompany === null) {
-            return new JsonResponse('car rental company does not exist', 400);
+        $request = json_decode($request->getContent(), 1);
+        $jwtToken = $JWTEncoder->decode($request['token']);
+        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
+
+        $carRental = $carRentalRepository->findOneBy(['id'=>$id]);
+        if($carRental->getId() !== $user->getId()) {
+            return new JsonResponse('You are not owner of this car rental company.', 400);
+        }
+        if($carRental === null) {
+            return new JsonResponse('Car rental company with id '.$id.' does not exist.', 400);
         }
         $entityManager = $this->getDoctrine()->getManager();
-        $entityManager->remove($carRentalCompany);
+        $entityManager->remove($carRental);
+        $user->setRoles(array("ROLE_USER"));
+        $entityManager->persist($user);
+        $vehicles = $carRental->getVehicles();
+        foreach ($vehicles as $vehicle) {
+            $images = $vehicle->getImages();
+            foreach($images as $image) {
+                $entityManager->remove($image);
+            }
+            $reservations = $vehicle->getReservations();
+            foreach($reservations as $reservation) {
+                $entityManager->remove($reservation);
+            }
+        }
+        foreach ($carRental->getVehicles() as $vehicle) {
+            $entityManager->remove($vehicle);
+    }
         $entityManager->flush();
-        return new JsonResponse('success', 200);
+        return new JsonResponse('Success.', 200);
     }
 
     /**
-     * @Route("/{id}", name="carrental_get", methods={"GET"})
+     * @Route("/{id}", name="carrental_get", methods={"POST"})
      * @param Request $request
      * @param CarRentalRepository $carRentalRepository
+     * @param JWTEncoderInterface $JWTEncoder
      * @return JsonResponse
+     * @throws JWTDecodeFailureException
      */
-    public function getByIdAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
+    public function getCarRentalByIdAction(Request $request, CarRentalRepository $carRentalRepository,
+                                           JWTEncoderInterface $JWTEncoder): JsonResponse
     {
         $id = $request->get('id');
+        $request = json_decode($request->getContent(), 1);
+        $JWTEncoder->decode($request['token']);
         $carRentalCompany = $carRentalRepository->findOneById($id);
         if(empty($carRentalCompany)) {
-            return new JsonResponse('no car rental company found by id '.$id, 400);
+            return new JsonResponse('No car rental company found by id '.$id.'.', 400);
         }
         return new JsonResponse($carRentalCompany, 200);
     }
