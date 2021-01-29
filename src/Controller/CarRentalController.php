@@ -109,14 +109,10 @@ class CarRentalController extends AbstractController
      * @param CarRentalRepository $carRentalRepository
      * @param JWTEncoderInterface $JWTEncoder
      * @return JsonResponse
-     * @throws JWTDecodeFailureException
      */
-    public function getCarRentalByIdAction(Request $request, CarRentalRepository $carRentalRepository,
-                                           JWTEncoderInterface $JWTEncoder): JsonResponse
+    public function getCarRentalByIdAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
     {
         $id = $request->get('id');
-        $request = json_decode($request->getContent(), 1);
-        $JWTEncoder->decode($request['token']);
         $carRentalCompany = $carRentalRepository->findOneById($id);
         if(empty($carRentalCompany)) {
             return new JsonResponse('No car rental company found by id '.$id.'.', 400);
