@@ -23,29 +23,32 @@ class ReservationRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('r')
             ->join('r.user', 'u')
             ->join('r.vehicle', 'v')
-            ->addSelect('u')
-            ->addSelect('v')
             ->join('v.carRental', 'cr')
-            ->addSelect('cr')
             ->join('cr.owner', 'o')
-            ->addSelect('o')
+            ->addSelect('u', 'v', 'cr', 'o')
             ->getQuery()
             ->getArrayResult();
     }
 
     public function findByUserId($id) {
         return $this->createQueryBuilder('r')
-            ->join('r.vehicle', 'v')
             ->where('r.user = :user_id')
             ->setParameter('user_id', $id)
-            ->addSelect('v')
             ->join('r.user', 'u')
-            ->addSelect('u')
+            ->join('r.vehicle', 'v')
             ->join('v.carRental', 'cr')
-            ->addSelect('cr')
             ->join('cr.owner', 'o')
-            ->addSelect('o')
+            ->addSelect('u', 'v', 'cr', 'o')
             ->getQuery()
             ->getArrayResult();
+    }
+
+    public function checkOwnerById($user_id) {
+        return $this->createQueryBuilder('r')
+            ->join('r.vehicle', 'v')
+            ->join('v.carRental', 'cr')
+            ->where('cr.owner = :user_id')
+            ->setParameter('user_id', $user_id)
+            ->getQuery()->getArrayResult();
     }
 }
