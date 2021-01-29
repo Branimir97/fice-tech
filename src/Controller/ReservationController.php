@@ -15,8 +15,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
-
 
 /**
  * Class ReservationController
@@ -120,7 +118,7 @@ class ReservationController extends AbstractController
         $carRental = $vehicle->getCarRental();
         $owner = $carRental->getOwner();
         if($user->getId() !== $owner->getId()) {
-            return new JsonResponse("You are not owner of this car rental company.");
+            return new JsonResponse("You are not owner of this car rental company.", 400);
         }
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($reservation);
@@ -171,10 +169,10 @@ class ReservationController extends AbstractController
         $carRental = $vehicle->getCarRental();
         $owner = $carRental->getOwner();
         if($user->getId() !== $owner->getId()) {
-            return new JsonResponse("You are not owner of this car rental company.");
+            return new JsonResponse("You are not owner of this car rental company.", 400);
         }
         if($reservation === null) {
-            return new JsonResponse('reservation does not exist', 200);
+            return new JsonResponse('Reservation does not exist.', 400);
         }
         $allowedStatus = ['Accepted', 'Rejected', 'Waiting'];
         if(!in_array($request['status'], $allowedStatus)) {
