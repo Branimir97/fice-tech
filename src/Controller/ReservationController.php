@@ -115,13 +115,10 @@ class ReservationController extends AbstractController
             return new JsonResponse('Reservation with id '.$id.' does not exist.', 400);
         }
         $vehicle = $reservation->getVehicle();
-        $carRental = $vehicle->getCarRental();
-        $owner = $carRental->getOwner();
-        if($user->getId() !== $owner->getId()) {
-            return new JsonResponse("You are not owner of this car rental company.", 400);
-        }
+        $vehicle->setStatus('Available');
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->remove($reservation);
+        $entityManager->persist($vehicle);
         $entityManager->flush();
         return new JsonResponse('Success.', 200);
     }

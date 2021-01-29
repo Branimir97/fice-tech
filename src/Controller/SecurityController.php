@@ -70,9 +70,8 @@ class SecurityController extends AbstractController
      */
     public function authAction(Request $request, JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
     {
-        $response = json_decode($request->getContent(), true);
-        $jwtToken = $JWTEncoder->decode($response['token']);
-
+        $request = json_decode($request->getContent(), true);
+        $jwtToken = $JWTEncoder->decode($request['token']);
         $user = $userRepository->getUserData($jwtToken['username']);
         return new JsonResponse($user, 200);
     }
