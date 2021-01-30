@@ -28,15 +28,17 @@ class ReservationController extends AbstractController
      * @param Request $request
      * @param ReservationRepository $reservationRepository
      * @param JWTEncoderInterface $JWTEncoder
+     * @param UserRepository $userRepository
      * @return Response
      * @throws JWTDecodeFailureException
      */
     public function getAllReservationsAction(Request $request, ReservationRepository $reservationRepository,
-                          JWTEncoderInterface $JWTEncoder): Response
+                          JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): Response
     {
         $request = json_decode($request->getContent(), 1);
-        $JWTEncoder->decode($request['token']);
-        $reservations = $reservationRepository->findAllAsArray();
+        $jwtToken = $JWTEncoder->decode($request['token']);
+        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
+        $reservations = $reservationRepository->findByUserId($user->getId());
          if(count($reservations) == 0) {
            return new JsonResponse('No reservations.', 400);
         }
