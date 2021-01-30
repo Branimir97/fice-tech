@@ -36,9 +36,10 @@ class ReservationRepository extends ServiceEntityRepository
             ->setParameter('user_id', $id)
             ->join('r.user', 'u')
             ->join('r.vehicle', 'v')
+            ->join('v.images', 'i')
             ->join('v.carRental', 'cr')
             ->join('cr.owner', 'o')
-            ->addSelect('u', 'v', 'cr', 'o')
+            ->addSelect('u', 'v', 'cr', 'o', 'i')
             ->getQuery()
             ->getArrayResult();
     }
