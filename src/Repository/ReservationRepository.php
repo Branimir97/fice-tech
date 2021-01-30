@@ -19,36 +19,17 @@ class ReservationRepository extends ServiceEntityRepository
         parent::__construct($registry, Reservation::class);
     }
 
-    public function findAllAsArray() {
-        return $this->createQueryBuilder('r')
-            ->join('r.user', 'u')
-            ->join('r.vehicle', 'v')
-            ->join('v.carRental', 'cr')
-            ->join('cr.owner', 'o')
-            ->addSelect('u', 'v', 'cr', 'o')
-            ->getQuery()
-            ->getArrayResult();
-    }
-
     public function findByUserId($id) {
         return $this->createQueryBuilder('r')
             ->where('r.user = :user_id')
             ->setParameter('user_id', $id)
             ->join('r.user', 'u')
             ->join('r.vehicle', 'v')
+            ->join('v.images', 'i')
             ->join('v.carRental', 'cr')
             ->join('cr.owner', 'o')
-            ->addSelect('u', 'v', 'cr', 'o')
+            ->addSelect('u', 'v', 'cr', 'o', 'i')
             ->getQuery()
             ->getArrayResult();
-    }
-
-    public function checkOwnerById($user_id) {
-        return $this->createQueryBuilder('r')
-            ->join('r.vehicle', 'v')
-            ->join('v.carRental', 'cr')
-            ->where('cr.owner = :user_id')
-            ->setParameter('user_id', $user_id)
-            ->getQuery()->getArrayResult();
     }
 }
