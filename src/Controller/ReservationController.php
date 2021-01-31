@@ -37,8 +37,11 @@ class ReservationController extends AbstractController
     {
         $request = json_decode($request->getContent(), 1);
         $jwtToken = $JWTEncoder->decode($request['token']);
-        $user = $userRepository->findUserByJwtUsername($jwtToken['username']);
-        $reservations = $reservationRepository->findByUserId($user->getId());
+        $owner = $userRepository->findUserByJwtUsername($jwtToken['username']);
+        if(!in_array("ROLE_ADMIN", $owner->getRoles())) {
+            return new JsonResponse('You are not the owner of the rental company.', 400);
+        }
+        $reservations = $reservationRepository->findByOwnerId($owner->getId());
          if(count($reservations) == 0) {
            return new JsonResponse('No reservations.', 400);
         }

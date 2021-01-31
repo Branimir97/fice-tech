@@ -32,4 +32,18 @@ class ReservationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getArrayResult();
     }
+
+    public function findByOwnerId($id) {
+        return $this->createQueryBuilder('r')
+            ->join('r.user', 'u')
+            ->join('r.vehicle', 'v')
+            ->join('v.images', 'i')
+            ->join('v.carRental', 'cr')
+            ->join('cr.owner', 'o')
+            ->where('cr.owner = :owner_id')
+            ->setParameter('owner_id', $id)
+            ->addSelect('u', 'v', 'cr', 'o', 'i')
+            ->getQuery()
+            ->getArrayResult();
+    }
 }
