@@ -48,8 +48,10 @@ class VehicleController extends AbstractController
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertVehicleAction(Request $request, CarRentalRepository $carRentalRepository,
-                                 UserRepository $userRepository, JWTEncoderInterface $JWTEncoder): JsonResponse
+    public function insertVehicleAction(Request $request,
+                                        CarRentalRepository $carRentalRepository,
+                                        UserRepository $userRepository,
+                                        JWTEncoderInterface $JWTEncoder): JsonResponse
     {
         $request = json_decode($request->getContent(), true);
         $jwtToken = $JWTEncoder->decode($request['token']);
@@ -102,8 +104,10 @@ class VehicleController extends AbstractController
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
-    public function updateVehicleAction(Request $request, VehicleRepository $vehicleRepository,
-                                        ImageRepository $imageRepository, JWTEncoderInterface $JWTEncoder,
+    public function updateVehicleAction(Request $request,
+                                        VehicleRepository $vehicleRepository,
+                                        ImageRepository $imageRepository,
+                                        JWTEncoderInterface $JWTEncoder,
                                         UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
@@ -164,8 +168,10 @@ class VehicleController extends AbstractController
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
-    public function deleteVehicleAction(Request $request, VehicleRepository $vehicleRepository,
-                                        JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
+    public function deleteVehicleAction(Request $request,
+                                        VehicleRepository $vehicleRepository,
+                                        JWTEncoderInterface $JWTEncoder,
+                                        UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
         $request = json_decode($request->getContent(), 1);
@@ -193,7 +199,8 @@ class VehicleController extends AbstractController
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
      */
-    public function filterByLocationAndDatesAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function filterByLocationAndDatesAction(Request $request,
+                                                   VehicleRepository $vehicleRepository): JsonResponse
     {
         $request = json_decode($request->getContent(), true);
         $vehicles1 = $vehicleRepository->filterAvailableByStatusAndLocation($request['location']);
@@ -213,7 +220,8 @@ class VehicleController extends AbstractController
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
      */
-    public function filterByCarRentalAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function filterByCarRentalAction(Request $request,
+                                            VehicleRepository $vehicleRepository): JsonResponse
     {
         $id = $request->get('id');
         $vehicles = $vehicleRepository->filterAvailableVehiclesByCarRental($id);
@@ -229,7 +237,8 @@ class VehicleController extends AbstractController
      * @param VehicleRepository $vehicleRepository
      * @return JsonResponse
      */
-    public function getVehicleByIdAction(Request $request, VehicleRepository $vehicleRepository): JsonResponse
+    public function getVehicleByIdAction(Request $request,
+                                         VehicleRepository $vehicleRepository): JsonResponse
     {
         $id = $request->get('id');
         $vehicle = $vehicleRepository->findOneAsArray($id);

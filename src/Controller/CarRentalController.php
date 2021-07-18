@@ -66,8 +66,10 @@ class CarRentalController extends AbstractController
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
-    public function deleteCarRentalAction(Request $request, CarRentalRepository $carRentalRepository,
-                                          JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
+    public function deleteCarRentalAction(Request $request,
+                                          CarRentalRepository $carRentalRepository,
+                                          JWTEncoderInterface $JWTEncoder,
+                                          UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
         $request = json_decode($request->getContent(), 1);
@@ -109,7 +111,8 @@ class CarRentalController extends AbstractController
      * @param CarRentalRepository $carRentalRepository
      * @return JsonResponse
      */
-    public function getCarRentalByIdAction(Request $request, CarRentalRepository $carRentalRepository): JsonResponse
+    public function getCarRentalByIdAction(Request $request,
+                                           CarRentalRepository $carRentalRepository): JsonResponse
     {
         $id = $request->get('id');
         $carRentalCompany = $carRentalRepository->findOneById($id);

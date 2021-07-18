@@ -22,7 +22,9 @@ class RegistrationController extends AbstractController
      * @return Response
      * @throws Exception
      */
-    public function register(Request $request, UserPasswordEncoderInterface $passwordEncoder, UserRepository $userRepository): Response
+    public function register(Request $request,
+                             UserPasswordEncoderInterface $passwordEncoder,
+                             UserRepository $userRepository): Response
     {
         $response = json_decode($request->getContent(), true);
 

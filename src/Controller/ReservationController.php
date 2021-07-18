@@ -32,8 +32,10 @@ class ReservationController extends AbstractController
      * @return Response
      * @throws JWTDecodeFailureException
      */
-    public function getAllReservationsAction(Request $request, ReservationRepository $reservationRepository,
-                          JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): Response
+    public function getAllReservationsAction(Request $request,
+                                             ReservationRepository $reservationRepository,
+                                             JWTEncoderInterface $JWTEncoder,
+                                             UserRepository $userRepository): Response
     {
         $request = json_decode($request->getContent(), 1);
         $jwtToken = $JWTEncoder->decode($request['token']);
@@ -58,9 +60,11 @@ class ReservationController extends AbstractController
      * @return JsonResponse
      * @throws Exception
      */
-    public function insertReservationAction(Request $request, VehicleRepository $vehicleRepository,
-                                 CarRentalRepository $carRentalRepository,
-                                 UserRepository $userRepository, JWTEncoderInterface $JWTEncoder): JsonResponse
+    public function insertReservationAction(Request $request,
+                                            VehicleRepository $vehicleRepository,
+                                            CarRentalRepository $carRentalRepository,
+                                            UserRepository $userRepository,
+                                            JWTEncoderInterface $JWTEncoder): JsonResponse
     {
         $id = $request->get('id');
         $request = json_decode($request->getContent(), true);
@@ -107,8 +111,10 @@ class ReservationController extends AbstractController
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
-    public function deleteReservationAction(Request $request, ReservationRepository $reservationRepository,
-                                            JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
+    public function deleteReservationAction(Request $request,
+                                            ReservationRepository $reservationRepository,
+                                            JWTEncoderInterface $JWTEncoder,
+                                            UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
         $request = json_decode($request->getContent(), 1);
@@ -136,8 +142,9 @@ class ReservationController extends AbstractController
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
-    public function getReservationByUserIdAction(Request $request, ReservationRepository $reservationRepository,
-                                      JWTEncoderInterface $JWTEncoder): JsonResponse
+    public function getReservationByUserIdAction(Request $request,
+                                                 ReservationRepository $reservationRepository,
+                                                 JWTEncoderInterface $JWTEncoder): JsonResponse
     {
         $id = $request->get('id');
         $request = json_decode($request->getContent(), 1);
@@ -158,8 +165,10 @@ class ReservationController extends AbstractController
      * @throws JWTDecodeFailureException
      * @Route("/update/{id}", name="reservation_update", methods={"PUT"})
      */
-    public function changeReservationStatusAction(Request $request, ReservationRepository $reservationRepository,
-                                            JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
+    public function changeReservationStatusAction(Request $request,
+                                                  ReservationRepository $reservationRepository,
+                                                  JWTEncoderInterface $JWTEncoder,
+                                                  UserRepository $userRepository): JsonResponse
     {
         $id = $request->get('id');
         $request = json_decode($request->getContent(), true);

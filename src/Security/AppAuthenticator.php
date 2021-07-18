@@ -31,7 +31,10 @@ class AppAuthenticator extends AbstractFormLoginAuthenticator implements Passwor
     private $csrfTokenManager;
     private $passwordEncoder;
 
-    public function __construct(EntityManagerInterface $entityManager, UrlGeneratorInterface $urlGenerator, CsrfTokenManagerInterface $csrfTokenManager, UserPasswordEncoderInterface $passwordEncoder)
+    public function __construct(EntityManagerInterface $entityManager,
+                                UrlGeneratorInterface $urlGenerator,
+                                CsrfTokenManagerInterface $csrfTokenManager,
+                                UserPasswordEncoderInterface $passwordEncoder)
     {
         $this->entityManager = $entityManager;
         $this->urlGenerator = $urlGenerator;
@@ -67,7 +70,8 @@ class AppAuthenticator extends AbstractFormLoginAuthenticator implements Passwor
             throw new InvalidCsrfTokenException();
         }
 
-        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $credentials['email']]);
+        $user = $this->entityManager->getRepository
+                (User::class)->findOneBy(['email' => $credentials['email']]);
 
         if (!$user) {
             // fail authentication with a custom error
@@ -90,7 +94,8 @@ class AppAuthenticator extends AbstractFormLoginAuthenticator implements Passwor
         return $credentials['password'];
     }
 
-    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $providerKey)
+    public function onAuthenticationSuccess(Request $request,
+                                            TokenInterface $token, string $providerKey)
     {
         if ($targetPath = $this->getTargetPath($request->getSession(), $providerKey)) {
             return new RedirectResponse($targetPath);

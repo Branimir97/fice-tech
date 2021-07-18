@@ -23,7 +23,8 @@ class ImageController extends AbstractController
      * @param ImageRepository $imageRepository
      * @return JsonResponse
      */
-    public function unsetCover(Request $request, ImageRepository $imageRepository): JsonResponse
+    public function unsetCover(Request $request,
+                               ImageRepository $imageRepository): JsonResponse
     {
         $id = $request->get('id');
         $image = $imageRepository->findOneBy(['id'=>$id]);
@@ -44,7 +45,8 @@ class ImageController extends AbstractController
      * @param ImageRepository $imageRepository
      * @return JsonResponse
      */
-    public function setCover(Request $request, ImageRepository $imageRepository): JsonResponse
+    public function setCover(Request $request,
+                             ImageRepository $imageRepository): JsonResponse
     {
         $id = $request->get('id');
         $image = $imageRepository->findOneBy(['id'=>$id]);

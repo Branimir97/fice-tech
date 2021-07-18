@@ -30,7 +30,10 @@ class SecurityController extends AbstractController
      * @return JsonResponse
      * @throws JWTEncodeFailureException
      */
-    public function login(Request $request, UserRepository $userRepository, UserPasswordEncoderInterface $passwordEncoder, JWTEncoderInterface $JWTEncoder): JsonResponse
+    public function login(Request $request,
+                          UserRepository $userRepository,
+                          UserPasswordEncoderInterface $passwordEncoder,
+                          JWTEncoderInterface $JWTEncoder): JsonResponse
     {
         $response = json_decode($request->getContent(), 1);
         $user = $userRepository->findOneBy(["email"=>$response['email']]);
@@ -56,9 +59,7 @@ class SecurityController extends AbstractController
       * @Route("/logout", name="app_logout")
      */
     public function logout()
-    {
-        throw new \LogicException('This method can be blank - it will be intercepted by the logout key on your firewall.');
-    }
+    {}
 
     /**
      * @Route("/auth", name="app_auth", methods={"POST"})
@@ -68,7 +69,9 @@ class SecurityController extends AbstractController
      * @return JsonResponse
      * @throws JWTDecodeFailureException
      */
-    public function authAction(Request $request, JWTEncoderInterface $JWTEncoder, UserRepository $userRepository): JsonResponse
+    public function authAction(Request $request,
+                               JWTEncoderInterface $JWTEncoder,
+                               UserRepository $userRepository): JsonResponse
     {
         $request = json_decode($request->getContent(), true);
         $jwtToken = $JWTEncoder->decode($request['token']);
